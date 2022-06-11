@@ -3,6 +3,17 @@
 #include "include/bmp.h"
 
 
+
+void copy_bmp_data(FILE* file, rgb_data* pixels, int img_size){
+     for (int i = 0; i < img_size; i++)
+    {
+        rgb_data BGR = pixels[i];
+        unsigned char color[3] = {BGR.b, BGR.g, BGR.r};
+        fwrite(color, 1, sizeof(color), file);
+    }
+}
+
+
 void init_file_header(bmp_file_header* bfh, int file_size)
 {
     memcpy(&(bfh->bf_type), "BM", 2);
@@ -43,44 +54,65 @@ void create_bmp_file(char* file_name, int height, int width, rgb_data* pixels)
     FILE *fp = fopen(file_name, "wb");
     fwrite(&bfh, 1, 14, fp);
     fwrite(&bih, 1, sizeof(bih), fp);
+    copy_bmp_data(fp, pixels, img_size);
 
-    for (int i = 0; i < img_size; i++)
-    {
-        rgb_data BGR = pixels[i];
-        unsigned char color[3] = {BGR.b, BGR.g, BGR.r};
-        fwrite(color, 1, sizeof(color), fp);
-    }
     return;
 }
 
 int main(int argc, char *argv[])
 {
-    int height = 400;
-    int width = 400;
-    rgb_data pixels[height * width];
+    FILE* input = fopen("ejemplo2022/ladoLSB1.bmp", "r");
+    FILE* output = fopen("out.bmp","wb");
+    bmp_file_header bfh;
+    bmp_image_header bih;
 
-    for (int x = 0; x < width; x++)
-    {
-        for (int y = 0; y < height; y++)
-        {
-            int a = y * width + x;
+    fread(&bfh, 1, 14, input);
+    fread(&bih,1, sizeof(bih), input);
+    fwrite(&bfh, 1, 14, output);
+    fwrite(&bih, 1, sizeof(bih), output);
 
-            if ((x > 50 && x < 350) && (y > 50 && y < 350))
-            {
-                pixels[a].r = 255;
-                pixels[a].g = 255;
-                pixels[a].b = 5;
-            }
-            else
-            {
-                pixels[a].r = 0;
-                pixels[a].g = 0;
-                pixels[a].b = 155;
-            }
-        }
+    printf("%s\n", (char *)&bfh.bf_type);
+    printf("%ld\n", sizeof(bfh.bf_type));
+    printf("%d\n", bih.height);
+    printf("%d\n", bih.width);
+    printf("%d\n", bih.image_size);
+
+    unsigned char fp_b;
+    for(int i = 0 ;  i < bih.image_size ; i++ ){ 
+        fread(&fp_b ,1, 1, input);
+        fwrite(&fp_b,1,1,output);
     }
 
-    create_bmp_file("test_file.bmp", height, width, pixels);
+
+
+
+
+    // int height = 400;
+    // int width = 400;
+    // rgb_data pixels[height * width];
+
+    // for (int x = 0; x < width; x++)
+    // {
+    //     for (int y = 0; y < height; y++)
+    //     {
+    //         int a = y * width + x;
+
+    //         if ((x > 50 && x < 350) && (y > 50 && y < 350))
+    //         {
+    //             pixels[a].r = 255;
+    //             pixels[a].g = 255;
+    //             pixels[a].b = 5;
+    //         }
+    //         else
+    //         {
+    //             pixels[a].r = 0;
+    //             pixels[a].g = 0;
+    //             pixels[a].b = 155;
+    //         }
+    //     }
+    // }
+
+    // create_bmp_file("test_file.bmp", height, width, pixels);
 
     return 0;
 }
