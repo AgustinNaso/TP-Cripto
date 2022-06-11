@@ -12,5 +12,6 @@
 
 size_t extractEmbeddedSize(bmpFile *bmp, InputParams *inputParams);
 uint8_t extractByteFromLSB1(size_t byte, const uint8_t *data);
+uint8_t extractByteFromLSB4(size_t byte, const uint8_t *data);
 
 #endif

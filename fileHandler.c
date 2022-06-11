@@ -50,6 +50,19 @@ bmpFile *parseBmpFile(char *bmpPath)
     return bmp;
 }
 
+void writeMessageToOutput(file *extractedFile, const char *outputFileName) 
+{
+    char *fullOutputFileName = malloc(strlen(outputFileName) + strlen((char *) extractedFile->extension));
+    fullOutputFileName = strcpy(fullOutputFileName, outputFileName);
+    fullOutputFileName = strcat(fullOutputFileName, (char *) extractedFile->extension);
+
+    FILE *fd = fopen(fullOutputFileName, "w+"); //reading necessary?
+    fwrite(extractedFile->data, extractedFile->size, 1, fd);
+    fclose(fd);
+
+    free(fullOutputFileName);
+}
+
 void copyBmpData(FILE* file, rgbData* pixels, int img_size)
 {
     for (int i = 0; i < img_size; i++)

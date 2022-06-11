@@ -46,7 +46,7 @@ typedef struct file
     uint8_t *extension;
 } file;
 
-
 bmpFile *parseBmpFile(char *bmpPath);
+void writeMessageToOutput(file *extractedFile, const char *outputFileName);
 
 #endif
