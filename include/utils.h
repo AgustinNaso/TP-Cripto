@@ -1,5 +1,5 @@
-#ifndef CRYPTO_HANDLER_H
-#define CRYPTO_HANDLER_H
+#ifndef UTILS_H
+#define UTILS_H
 
 // #include <openssl/evp.h>
 // #include "types.h"

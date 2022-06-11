@@ -23,7 +23,7 @@ typedef enum INPUT_RET
 typedef enum OPTIONS
 {
   EMB,
-  EXT,
+  EXTR,
   IN,
   CARRIER,
   OUT,
@@ -73,9 +73,9 @@ typedef enum BMP_CHECK
 typedef struct InputParams 
 {
   OPERATION operation;
-  char * inputFile;
-  char * outputFile;
-  char * carrierFile;
+  char * inputFile; // -in
+  char * outputFile; // -out
+  char * carrierFile; // -p
   STEGO_ALGORITHM stego;
   ENCRYPTION encryption;
   ENCRYPTION_MODE mode;

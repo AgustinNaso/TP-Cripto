@@ -84,7 +84,7 @@ INPUT_RET parseInput (int argc, char* argv[], InputParams *inputParams) {
 void initLongOptions() {
   longOptions = malloc(sizeof(struct option) * (options + 1));
   addOption(EMB, "embed", no_argument, 'b');
-  addOption(EXT, "extract", no_argument, 'x');
+  addOption(EXTR, "extract", no_argument, 'x');
   addOption(IN, "in", required_argument, 'i');
   addOption(CARRIER, "p", required_argument, 'c');
   addOption(OUT, "out", required_argument, 'o');
@@ -115,7 +115,7 @@ void addOption(OPTIONS opt, const char *name, int hasArg, int val) {
 
 void parseOperation(int opt, InputParams *inputParams) {
   if (opt == 'b') {
-    if (optionFlags[EXT] != 0) {
+    if (optionFlags[EXTR] != 0) {
       inputParams->status = OPERATION_ERROR;
       return;
     }
@@ -218,7 +218,7 @@ void checkMode(const char *mode, InputParams *inputParams) {
 }
 
 void checkMissingParams(InputParams *inputParams) {
-  if (optionFlags[EMB] == 0 && optionFlags[EXT] == 0) {
+  if (optionFlags[EMB] == 0 && optionFlags[EXTR] == 0) {
     inputParams->status = MISSING_OPERATION;
     return;
   }
@@ -229,7 +229,7 @@ void checkMissingParams(InputParams *inputParams) {
 int missingExtractAndEmbedParams() {
   int embedParams = optionFlags[IN] && optionFlags[CARRIER] && optionFlags[OUT] && optionFlags[STEGO];
   int extractParams = optionFlags[CARRIER] && optionFlags[OUT] && optionFlags[STEGO];
-  return (optionFlags[EMB] && !embedParams) || (optionFlags[EXT] && !extractParams);
+  return (optionFlags[EMB] && !embedParams) || (optionFlags[EXTR] && !extractParams);
 }
 
 int missingOptionalParams() {

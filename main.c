@@ -1,10 +1,14 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include "include/parser.h"
+#include "include/fileHandler.h"
+#include "include/extract.h"
 
 static InputParams inputParams;
 
-int main(int argc, char* argv[]) {
+int main(int argc, char* argv[]) 
+{
     INPUT_RET inputRet = parseInput(argc, argv, &inputParams);
     switch (inputRet)
     {
@@ -25,7 +29,7 @@ int main(int argc, char* argv[]) {
         break;
     case PARAMETER_NOT_ALLOWED:
         printf("Error: -in not allowed for this operation\n");
-        break;;
+        break;
     case STEGO_NOT_ALLOWED:
         printf("Error: -steg parameter not allowed\n");
         break;
@@ -38,6 +42,23 @@ int main(int argc, char* argv[]) {
     default:
         break;
     }
-    printf("Input ret: %d\n", inputRet);
-    return 0;
+
+    if (inputRet == OK) 
+    {
+        bmpFile *bmp;
+        file *extractedFile = malloc(sizeof(file));
+
+        if (inputParams.operation == EXTRACT) 
+        {
+            if ((bmp = parseBmpFile(inputParams.carrierFile)) == NULL) return EXIT_FAILURE;
+            if (extract(bmp, &inputParams, extractedFile) == FAILURE) 
+            {
+                perror("Unable to extract file\n");
+                return EXIT_FAILURE;
+            }
+
+        }
+    }
+
+    return EXIT_SUCCESS;
 }
