@@ -119,9 +119,26 @@ void createBmpFile(char* file_name, int height, int width, rgbData* pixels)
     return;
 }
 
+void lsb1(unsigned char* pixel, FILE* msg, int * bitsToRead, unsigned char* currChar){
+    int charsRead = 0;
+    for(int i = 0 ; i < 3 ; i++){
+        if(*bitsToRead == 0 ){
+            charsRead = fread(currChar, 1, 1, msg);
+            if(charsRead == 0) return;
+            *bitsToRead = 8;
+        }
+        char currBit = ((*currChar)>>((*bitsToRead) - 1))&1;
+        printf("%d\n", currBit);
+        pixel[i] = (pixel[i] & ~1) | currBit;
+        (*bitsToRead)--;
+    }
+}
+
+
 // int main(int argc, char *argv[])
 // {
-//     FILE* input = fopen("ejemplo2022/ladoLSB1.bmp", "r");
+//     FILE* input = fopen("resources/ladoLSB1.bmp", "r");
+//     FILE* msg = fopen("msg.txt","r");
 //     FILE* output = fopen("out.bmp","wb");
 //     bmpFileHeader bfh;
 //     bmpImageHeader bih;
@@ -131,48 +148,15 @@ void createBmpFile(char* file_name, int height, int width, rgbData* pixels)
 //     fwrite(&bfh, 1, 14, output);
 //     fwrite(&bih, 1, sizeof(bih), output);
 
-//     printf("%s\n", (char *)&bfh.type);
-//     printf("%ld\n", sizeof(bfh.type));
-//     printf("%d\n", bih.height);
-//     printf("%d\n", bih.width);
-//     printf("%d\n", bih.imageSize);
 
-//     unsigned char fp_b;
-//     for(int i = 0 ;  i < bih.imageSize ; i++ ){ 
-//         fread(&fp_b ,1, 1, input);
-//         fwrite(&fp_b,1,1,output);
+//     unsigned char pixel[3];
+//     int bitsToRead = 0;
+//     unsigned char currChar;
+//     for(int i = 0 ;  i < bih.imageSize/3 ; i++ ){ 
+//         fread(pixel ,1, sizeof(pixel), input);
+//         lsb1(pixel, msg, &bitsToRead, &currChar);
+//         fwrite(pixel,1,sizeof(pixel),output);
 //     }
-
-
-
-
-
-//     // int height = 400;
-//     // int width = 400;
-//     // rgb_data pixels[height * width];
-
-//     // for (int x = 0; x < width; x++)
-//     // {
-//     //     for (int y = 0; y < height; y++)
-//     //     {
-//     //         int a = y * width + x;
-
-//     //         if ((x > 50 && x < 350) && (y > 50 && y < 350))
-//     //         {
-//     //             pixels[a].r = 255;
-//     //             pixels[a].g = 255;
-//     //             pixels[a].b = 5;
-//     //         }
-//     //         else
-//     //         {
-//     //             pixels[a].r = 0;
-//     //             pixels[a].g = 0;
-//     //             pixels[a].b = 155;
-//     //         }
-//     //     }
-//     // }
-
-//     // create_bmp_file("test_file.bmp", height, width, pixels);
 
 //     return 0;
 // }
