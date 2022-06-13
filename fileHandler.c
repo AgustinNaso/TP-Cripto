@@ -2,12 +2,13 @@
 #include <string.h>
 #include <stdlib.h>
 #include "include/fileHandler.h"
+#include "include/utils.h"
 
-bmpFile *parseBmpFile(char *bmpPath) 
+bmpFile *parseBmpFile(char *bmpPath)
 {
     FILE *fd;
 
-    if ((fd = fopen(bmpPath, "r")) == NULL) 
+    if ((fd = fopen("out.bmp", "r")) == NULL)
     {
         fprintf(stderr, "Error: unable to open BMP file \"%s\"\n", bmpPath);
         return NULL;
@@ -17,53 +18,53 @@ bmpFile *parseBmpFile(char *bmpPath)
     bmp->header = malloc(sizeof(bmpFileHeader));
     bmp->imageHeader = malloc(sizeof(bmpImageHeader));
 
-    if (fread(bmp->header, sizeof(bmpFileHeader), 1, fd) != 1) 
+    if (fread(bmp->header, sizeof(bmpFileHeader), 1, fd) != 1)
     {
         perror("Unable to read BMP header");
-        //TODO: free all
+        // TODO: free all
         return NULL;
     }
 
-    if (fread(bmp->imageHeader, sizeof(bmpImageHeader), 1, fd) != 1) 
+    if (fread(bmp->imageHeader, sizeof(bmpImageHeader), 1, fd) != 1)
     {
         perror("Unable to read BMP image header");
-        //TODO: free all
+        // TODO: free all
         return NULL;
     }
 
-    if (bmp->imageHeader->bitCount != BITS_PER_PIXEL) 
+    if (bmp->imageHeader->bitCount != BITS_PER_PIXEL)
     {
         fprintf(stderr, "Error: expected bits per pixel is %d\n", BITS_PER_PIXEL);
-        //TODO: free all
+        // TODO: free all
         return NULL;
     }
 
     bmp->data = malloc(bmp->imageHeader->imageSize);
 
-    if (fread(bmp->data, bmp->imageHeader->imageSize, 1, fd) != 1) 
+    if (fread(bmp->data, bmp->imageHeader->imageSize, 1, fd) != 1)
     {
         perror("Unable to read BMP image data");
-        //TODO: free all
+        // TODO: free all
         return NULL;
     }
 
     return bmp;
 }
 
-void writeMessageToOutput(file *extractedFile, const char *outputFileName) 
+void writeMessageToOutput(file *extractedFile, const char *outputFileName)
 {
-    char *fullOutputFileName = malloc(strlen(outputFileName) + strlen((char *) extractedFile->extension));
+    char *fullOutputFileName = malloc(strlen(outputFileName) + strlen((char *)extractedFile->extension));
     fullOutputFileName = strcpy(fullOutputFileName, outputFileName);
-    fullOutputFileName = strcat(fullOutputFileName, (char *) extractedFile->extension);
+    fullOutputFileName = strcat(fullOutputFileName, (char *)extractedFile->extension);
 
-    FILE *fd = fopen(fullOutputFileName, "w+"); //reading necessary?
+    FILE *fd = fopen(fullOutputFileName, "w+"); // reading necessary?
     fwrite(extractedFile->data, extractedFile->size, 1, fd);
     fclose(fd);
 
     free(fullOutputFileName);
 }
 
-void copyBmpData(FILE* file, rgbData* pixels, int img_size)
+void copyBmpData(FILE *file, rgbData *pixels, int img_size)
 {
     for (int i = 0; i < img_size; i++)
     {
@@ -73,8 +74,7 @@ void copyBmpData(FILE* file, rgbData* pixels, int img_size)
     }
 }
 
-
-void initFileHeader(bmpFileHeader* bfh, int file_size)
+void initFileHeader(bmpFileHeader *bfh, int file_size)
 {
     memcpy(&(bfh->type), "BM", 2);
     bfh->size = file_size;
@@ -83,7 +83,7 @@ void initFileHeader(bmpFileHeader* bfh, int file_size)
     bfh->offset = 0;
 }
 
-void initImageHeader(bmpImageHeader* bih, int ppm, int file_size, int width, int height)
+void initImageHeader(bmpImageHeader *bih, int ppm, int file_size, int width, int height)
 {
     bih->headerSize = sizeof(*bih);
     bih->width = width;
@@ -98,8 +98,7 @@ void initImageHeader(bmpImageHeader* bih, int ppm, int file_size, int width, int
     bih->importantColors = 0;
 }
 
-
-void createBmpFile(char* file_name, int height, int width, rgbData* pixels)
+void createBmpFile(char *file_name, int height, int width, rgbData *pixels)
 {
     bmpImageHeader bih;
     bmpFileHeader bfh;
@@ -119,44 +118,108 @@ void createBmpFile(char* file_name, int height, int width, rgbData* pixels)
     return;
 }
 
-void lsb1(unsigned char* pixel, FILE* msg, int * bitsToRead, unsigned char* currChar){
-    int charsRead = 0;
-    for(int i = 0 ; i < 3 ; i++){
-        if(*bitsToRead == 0 ){
-            charsRead = fread(currChar, 1, 1, msg);
-            if(charsRead == 0) return;
-            *bitsToRead = 8;
-        }
-        char currBit = ((*currChar)>>((*bitsToRead) - 1))&1;
-        printf("%d\n", currBit);
-        pixel[i] = (pixel[i] & ~1) | currBit;
-        (*bitsToRead)--;
+void lsb1(unsigned char msgByte, FILE* input, FILE* output)
+{
+    unsigned char inputFileByte;
+    for(int i = 7 ; i >= 0; i--){
+        fread(&inputFileByte,1,1, input);
+        char currBit = ((msgByte) >> i) & 1;
+        inputFileByte = (inputFileByte & ~1) | currBit;
+        fwrite(&inputFileByte, 1, 1, output);
     }
 }
 
+void embed(const char * bmpPath, const char * filePath, const char * outBmpName, int lsbType) {
+    FILE *carrier = fopen(bmpPath, "r");
+    FILE *fileToEmbed = fopen(filePath, "r");
+     void (*chosenStegAlgorithm)(unsigned char, FILE *, FILE *);
+    switch (lsbType)
+    {
+    case 1:
+        chosenStegAlgorithm = lsb1;
+        break;
+    default:
+        break;
+    }
+    const char * fileExtension = getFileExtension(filePath);
+    fseek(fileToEmbed, 0L, SEEK_END);
+    uint32_t sz = ftell(fileToEmbed);
+    rewind(fileToEmbed);
+    FILE *output = fopen(outBmpName, "wb");
+    bmpFileHeader bfh;
+    bmpImageHeader bih;
 
-// int main(int argc, char *argv[])
-// {
-//     FILE* input = fopen("resources/ladoLSB1.bmp", "r");
-//     FILE* msg = fopen("msg.txt","r");
-//     FILE* output = fopen("out.bmp","wb");
-//     bmpFileHeader bfh;
-//     bmpImageHeader bih;
+    fread(&bfh, 1, 14, carrier);
+    fread(&bih, 1, sizeof(bih), carrier);
+    fwrite(&bfh, 1, 14, output);
+    fwrite(&bih, 1, sizeof(bih), output);
 
-//     fread(&bfh, 1, 14, input);
-//     fread(&bih,1, sizeof(bih), input);
-//     fwrite(&bfh, 1, 14, output);
-//     fwrite(&bih, 1, sizeof(bih), output);
+    //Embed file size
+    char szBits[32];
+    for (char i = 0; i < 32; i++)
+    {
+        szBits[i] = (sz >> 32 - 1 - i) & 1;
+    }
+    unsigned char byte;
+    for (char i = 0; i < 32; i++)
+    {
+        fread(&byte, 1, 1, carrier);
+        byte = (byte & ~1) | szBits[i];
+        fwrite(&byte, 1, 1, output);
+    }
+    //Embed fileToEmbed
+    while(fread(&byte, 1, sizeof(byte), fileToEmbed) == 1)
+        chosenStegAlgorithm(byte, carrier, output);
+    //Embed extension
+    for(int i = 0; i < strlen(fileExtension); i++)
+        chosenStegAlgorithm(fileExtension[i], carrier, output);
+    //Copy the remaining data
+    while(fread(&byte, 1, sizeof(byte), carrier))
+        fwrite(&byte, 1, 1, output);
 
+}
 
-//     unsigned char pixel[3];
-//     int bitsToRead = 0;
-//     unsigned char currChar;
-//     for(int i = 0 ;  i < bih.imageSize/3 ; i++ ){ 
-//         fread(pixel ,1, sizeof(pixel), input);
-//         lsb1(pixel, msg, &bitsToRead, &currChar);
-//         fwrite(pixel,1,sizeof(pixel),output);
-//     }
+int main(int argc, char *argv[])
+{
+    embed("resources/lado.bmp", "msg.txt", "out.bmp", 1);
+    // FILE *input = fopen("resources/ladoLSB1.bmp", "r");
+    // FILE *msg = fopen("msg.txt", "r");
+    // const char * fileExtension = getFileExtension("msg.txt");
+    // fseek(msg, 0L, SEEK_END);
+    // uint32_t sz = ftell(msg);
+    // rewind(msg);
+    // printf("size: %d\n", sz);
+    // FILE *output = fopen("out.bmp", "wb");
+    // bmpFileHeader bfh;
+    // bmpImageHeader bih;
 
-//     return 0;
-// }
+    // fread(&bfh, 1, 14, input);
+    // fread(&bih, 1, sizeof(bih), input);
+    // fwrite(&bfh, 1, 14, output);
+    // fwrite(&bih, 1, sizeof(bih), output);
+
+    // //Embed file size
+    // char szBits[32];
+    // for (char i = 0; i < 32; i++)
+    // {
+    //     szBits[i] = (sz >> 32 - 1 - i) & 1;
+    // }
+    // unsigned char byte;
+    // for (char i = 0; i < 32; i++)
+    // {
+    //     fread(&byte, 1, 1, input);
+    //     byte = (byte & ~1) | szBits[i];
+    //     fwrite(&byte, 1, 1, output);
+    // }
+    // //Embed msg
+    // while(fread(&byte, 1, sizeof(byte), msg) == 1)
+    //     lsb1(byte, input, output);
+    // //Embed extension
+    // for(int i = 0; i < strlen(fileExtension); i++)
+    //     lsb1(fileExtension[i], input, output);
+    // //Copy the remaining data
+    // while(fread(&byte, 1, sizeof(byte), input))
+    //     fwrite(&byte, 1, 1, output);
+
+    return 0;
+}
