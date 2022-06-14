@@ -18,3 +18,9 @@ const char* getFileExtension(const char * path)
     }
     return result;
 }
+
+int modifyBit(int number, int position, int bit)
+{
+    int mask = 1 << position;
+    return ((number & ~mask) | (bit << position));
+}

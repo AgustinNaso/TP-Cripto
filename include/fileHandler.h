@@ -5,6 +5,9 @@
 #include <stddef.h>
 #define HEADER_SIZE 54
 #define BITS_PER_PIXEL 24
+#define LSB1 0
+#define LSB4 1
+#define LSBI 2
 
 typedef struct bmpFileHeader {
     uint16_t    type;

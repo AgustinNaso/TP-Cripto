@@ -118,13 +118,32 @@ void createBmpFile(char *file_name, int height, int width, rgbData *pixels)
     return;
 }
 
+
+void lsb4(unsigned char msgByte, FILE* input, FILE* output){
+    unsigned char inputFileByte;
+    int i = 7;
+    fread(&inputFileByte,1,1, input);
+    for( ; i >= 4; i--){
+        char currBit = ((msgByte) >> i) & 1;
+        inputFileByte = modifyBit(inputFileByte, i%4, currBit);
+    }
+    fwrite(&inputFileByte, 1, 1, output);
+    fread(&inputFileByte,1,1, input);
+    for( ; i >= 0; i--){
+        char currBit = ((msgByte) >> i) & 1;
+        inputFileByte = modifyBit(inputFileByte, i, currBit);
+    }
+    fwrite(&inputFileByte, 1, 1, output);
+}
+
 void lsb1(unsigned char msgByte, FILE* input, FILE* output)
 {
     unsigned char inputFileByte;
     for(int i = 7 ; i >= 0; i--){
         fread(&inputFileByte,1,1, input);
         char currBit = ((msgByte) >> i) & 1;
-        inputFileByte = (inputFileByte & ~1) | currBit;
+        //Insert currBit in least significant bit of inputFileByte
+        inputFileByte = modifyBit(inputFileByte, 0, currBit);
         fwrite(&inputFileByte, 1, 1, output);
     }
 }
@@ -135,8 +154,11 @@ void embed(const char * bmpPath, const char * filePath, const char * outBmpName,
      void (*chosenStegAlgorithm)(unsigned char, FILE *, FILE *);
     switch (lsbType)
     {
-    case 1:
+    case LSB1:
         chosenStegAlgorithm = lsb1;
+        break;
+    case LSB4:
+        chosenStegAlgorithm = lsb4;
         break;
     default:
         break;
@@ -155,17 +177,10 @@ void embed(const char * bmpPath, const char * filePath, const char * outBmpName,
     fwrite(&bih, 1, sizeof(bih), output);
 
     //Embed file size
-    char szBits[32];
-    for (char i = 0; i < 32; i++)
-    {
-        szBits[i] = (sz >> 32 - 1 - i) & 1;
-    }
     unsigned char byte;
-    for (char i = 0; i < 32; i++)
-    {
-        fread(&byte, 1, 1, carrier);
-        byte = (byte & ~1) | szBits[i];
-        fwrite(&byte, 1, 1, output);
+    for(char i = 0 ; i < 4; i++){
+        byte = (sz >> (8*(3 - i))) & 0xff;
+        chosenStegAlgorithm(byte, carrier, output);
     }
     //Embed fileToEmbed
     while(fread(&byte, 1, sizeof(byte), fileToEmbed) == 1)
@@ -181,7 +196,7 @@ void embed(const char * bmpPath, const char * filePath, const char * outBmpName,
 
 int main(int argc, char *argv[])
 {
-    embed("resources/lado.bmp", "msg.txt", "out.bmp", 1);
+    embed("resources/lado.bmp", "msg.txt", "out.bmp", LSB4);
     // FILE *input = fopen("resources/ladoLSB1.bmp", "r");
     // FILE *msg = fopen("msg.txt", "r");
     // const char * fileExtension = getFileExtension("msg.txt");
