@@ -8,8 +8,8 @@
 bmpFile *parseBmpFile(char *bmpPath)
 {
     FILE *fd;
-
-    if ((fd = fopen("out.bmp", "r")) == NULL)
+    printf("%s\n", bmpPath);
+    if ((fd = fopen(bmpPath, "r")) == NULL)
     {
         fprintf(stderr, "Error: unable to open BMP file \"%s\"\n", bmpPath);
         return NULL;
@@ -32,7 +32,7 @@ bmpFile *parseBmpFile(char *bmpPath)
         // TODO: free all
         return NULL;
     }
-
+    printf("bitc %d\n", bmp->imageHeader->bitCount);
     if (bmp->imageHeader->bitCount != BITS_PER_PIXEL)
     {
         fprintf(stderr, "Error: expected bits per pixel is %d\n", BITS_PER_PIXEL);
@@ -178,7 +178,6 @@ void lsbiInsert(unsigned char msgByte, FILE *input, FILE *output, int groups[4][
         char currBit = GET_NTH_LSB(msgByte, i);
         if (groups[0][0] != -1)
         {
-            char LSB = GET_NTH_LSB(inputFileByte, 1);
             char secondLSB = GET_NTH_LSB(inputFileByte, 2);
             char thirdLSB = GET_NTH_LSB(inputFileByte, 3);
             if (groups[GET_INT_FROM_2_BITS(thirdLSB, secondLSB)][MATCHING] < groups[GET_INT_FROM_2_BITS(thirdLSB, secondLSB)][NON_MATCHING])
@@ -194,7 +193,7 @@ void embed(const char *bmpPath, const char *filePath, const char *outBmpName, in
     FILE *carrier = fopen(bmpPath, "r");
     FILE *fileToEmbed = fopen(filePath, "r");
     void (*chosenStegAlgorithm)(unsigned char, FILE *, FILE *, int(*)[2]);
-    int groups[4][2] = {-1};
+    int groups[4][2] = {{-1}};
     switch (lsbType)
     {
     case LSBI:
@@ -274,8 +273,8 @@ void embed(const char *bmpPath, const char *filePath, const char *outBmpName, in
     fclose(output);
 }
 
-int main(int argc, char *argv[])
-{
-    embed("resources/lado.bmp", "msg.txt", "out.bmp", LSBI);
-    return 0;
-}
+//int main(int argc, char *argv[])
+//{
+//    embed("resources/lado.bmp", "msg.txt", "out.bmp", LSBI);
+//    return 0;
+//}
