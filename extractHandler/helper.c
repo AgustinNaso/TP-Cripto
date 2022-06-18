@@ -1,16 +1,17 @@
 #include "../include/helper.h"
 #include "../include/types.h"
+#include <stdio.h>
 
 size_t extractSizeFromLSB1(bmpFile *bmp);
 size_t extractSizeFromLSB4(bmpFile *bmp);
 size_t extractSizeFromLSBI(bmpFile *bmp);
 
-size_t extractEmbeddedSize(bmpFile *bmp, InputParams *inputParams) 
+size_t extractEmbeddedSize(bmpFile *bmp, InputParams inputParams) 
 {
-  if (inputParams->stego == LSB1) 
+  if (inputParams.stego == LSB1) 
   {
     return extractSizeFromLSB1(bmp);
-  } else if (inputParams->stego == LSB4) 
+  } else if (inputParams.stego == LSB4) 
   {
     return extractSizeFromLSB4(bmp);
   }
@@ -27,7 +28,10 @@ size_t extractSizeFromLSB1(bmpFile *bmp)
     size |= extractedByte << (8u * (3u - i));
   }
 
-  if (size * 8 != bmp->imageHeader->imageSize) return SIZE_ERROR;
+  printf("size %d\n", size * 8);
+  printf("size 2 %d\n", bmp->imageHeader->imageSize);
+
+  if (size * 8 > bmp->imageHeader->imageSize) return SIZE_ERROR;
 
   return size;
 }
