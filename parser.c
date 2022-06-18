@@ -130,7 +130,8 @@ void parseOperation(int opt, InputParams *inputParams) {
   return;
 }
 
-void parseParamWithArg(int opt, InputParams *inputParams) {
+void parseParamWithArg(int opt, InputParams *inputParams)
+{
   switch (opt)
   {
   case 'i':
@@ -142,7 +143,8 @@ void parseParamWithArg(int opt, InputParams *inputParams) {
     strcpy(inputParams->inputFile, optarg);
     break;
   case 'c':
-    if (parseBMPFile(optarg, inputParams) != BMP_ERROR) return;
+
+    if (parseBMPFile(optarg, inputParams) == BMP_ERROR) return;
     inputParams->carrierFile = calloc(strlen(optarg) + 1, sizeof(char));
     strcpy(inputParams->carrierFile, optarg);
     break;

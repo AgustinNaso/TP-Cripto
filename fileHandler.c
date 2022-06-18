@@ -8,8 +8,8 @@
 bmpFile *parseBmpFile(char *bmpPath)
 {
     FILE *fd;
-
-    if ((fd = fopen("out.bmp", "r")) == NULL)
+    printf("%s\n", bmpPath);
+    if ((fd = fopen(bmpPath, "r")) == NULL)
     {
         fprintf(stderr, "Error: unable to open BMP file \"%s\"\n", bmpPath);
         return NULL;
@@ -32,7 +32,7 @@ bmpFile *parseBmpFile(char *bmpPath)
         // TODO: free all
         return NULL;
     }
-
+    printf("bitc %d\n", bmp->imageHeader->bitCount);
     if (bmp->imageHeader->bitCount != BITS_PER_PIXEL)
     {
         fprintf(stderr, "Error: expected bits per pixel is %d\n", BITS_PER_PIXEL);

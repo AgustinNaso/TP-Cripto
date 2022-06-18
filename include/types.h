@@ -4,9 +4,7 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#define SIZE_BYTES 4
-
-typedef enum INPUT_RET 
+typedef enum INPUT_RET
 {
   OK = 0,
   OPERATION_ERROR,
