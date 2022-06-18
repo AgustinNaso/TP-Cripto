@@ -52,12 +52,12 @@ int main(int argc, char* argv[])
         {
             if ((bmp = parseBmpFile(inputParams.carrierFile)) == NULL) return EXIT_FAILURE;
 
-            if (extract(bmp, &inputParams, extractedFile) == FAILURE) 
+            if (extract(bmp, inputParams, extractedFile) == FAILURE) 
             {
                 perror("Unable to extract file\n");
                 return EXIT_FAILURE;
             }
-
+            
             writeMessageToOutput(extractedFile, inputParams.outputFile);
 
         }

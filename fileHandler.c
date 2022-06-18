@@ -19,7 +19,7 @@ bmpFile *parseBmpFile(char *bmpPath)
     bmp->header = malloc(sizeof(bmpFileHeader));
     bmp->imageHeader = malloc(sizeof(bmpImageHeader));
 
-    if (fread(bmp->header, sizeof(bmpFileHeader), 1, fd) != 1)
+    if (fread(bmp->header, 14, 1, fd) != 1)
     {
         perror("Unable to read BMP header");
         // TODO: free all
@@ -32,7 +32,7 @@ bmpFile *parseBmpFile(char *bmpPath)
         // TODO: free all
         return NULL;
     }
-    printf("bitc %d\n", bmp->imageHeader->bitCount);
+    
     if (bmp->imageHeader->bitCount != BITS_PER_PIXEL)
     {
         fprintf(stderr, "Error: expected bits per pixel is %d\n", BITS_PER_PIXEL);
@@ -56,10 +56,13 @@ void writeMessageToOutput(file *extractedFile, const char *outputFileName)
 {
     char *fullOutputFileName = malloc(strlen(outputFileName) + strlen((char *)extractedFile->extension));
     fullOutputFileName = strcpy(fullOutputFileName, outputFileName);
-    fullOutputFileName = strcat(fullOutputFileName, (char *)extractedFile->extension);
+    fullOutputFileName = strcat(fullOutputFileName, (char *) extractedFile->extension);
+
+    printf("%d\n", extractedFile->extension[0]);
 
     FILE *fd = fopen(fullOutputFileName, "w+"); // reading necessary?
     fwrite(extractedFile->data, extractedFile->size, 1, fd);
+    printf("%zu\n", extractedFile->size);
     fclose(fd);
 
     free(fullOutputFileName);

@@ -11,6 +11,6 @@ typedef enum EXTRACT_RET
   FAILURE
 } EXTRACT_RET;
 
-EXTRACT_RET extract(bmpFile *bmp, InputParams *inputParams, file *extractedFile);
+EXTRACT_RET extract(bmpFile *bmp, InputParams inputParams, file *extractedFile);
 
 #endif
