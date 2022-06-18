@@ -5,11 +5,6 @@
 #include <stddef.h>
 #define HEADER_SIZE 54
 #define BITS_PER_PIXEL 24
-#define LSB1 0
-#define LSB4 1
-#define LSBI 2
-#define GET_NTH_LSB(byte, n) ((byte >> (n-1) & 1))
-#define GET_INT_FROM_2_BITS(bit1, bit2) (2*bit1 + bit2)
 #define MATCHING 0
 #define NON_MATCHING 1
 

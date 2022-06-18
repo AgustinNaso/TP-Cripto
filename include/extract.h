@@ -5,7 +5,7 @@
 
 #include "../include/helper.h"
 
-typedef enum EXTRACT_RET 
+typedef enum EXTRACT_RET
 {
   SUCCESS,
   FAILURE

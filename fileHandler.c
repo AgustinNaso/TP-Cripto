@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "include/fileHandler.h"
+#include "include/types.h"
 #include "include/utils.h"
 
 bmpFile *parseBmpFile(char *bmpPath)
@@ -276,44 +277,5 @@ void embed(const char *bmpPath, const char *filePath, const char *outBmpName, in
 int main(int argc, char *argv[])
 {
     embed("resources/lado.bmp", "msg.txt", "out.bmp", LSBI);
-    // FILE *input = fopen("resources/ladoLSB1.bmp", "r");
-    // FILE *msg = fopen("msg.txt", "r");
-    // const char * fileExtension = getFileExtension("msg.txt");
-    // fseek(msg, 0L, SEEK_END);
-    // uint32_t sz = ftell(msg);
-    // rewind(msg);
-    // printf("size: %d\n", sz);
-    // FILE *output = fopen("out.bmp", "wb");
-    // bmpFileHeader bfh;
-    // bmpImageHeader bih;
-
-    // fread(&bfh, 1, 14, input);
-    // fread(&bih, 1, sizeof(bih), input);
-    // fwrite(&bfh, 1, 14, output);
-    // fwrite(&bih, 1, sizeof(bih), output);
-
-    // //Embed file size
-    // char szBits[32];
-    // for (char i = 0; i < 32; i++)
-    // {
-    //     szBits[i] = (sz >> 32 - 1 - i) & 1;
-    // }
-    // unsigned char byte;
-    // for (char i = 0; i < 32; i++)
-    // {
-    //     fread(&byte, 1, 1, input);
-    //     byte = (byte & ~1) | szBits[i];
-    //     fwrite(&byte, 1, 1, output);
-    // }
-    // //Embed msg
-    // while(fread(&byte, 1, sizeof(byte), msg) == 1)
-    //     lsb1(byte, input, output);
-    // //Embed extension
-    // for(int i = 0; i < strlen(fileExtension); i++)
-    //     lsb1(fileExtension[i], input, output);
-    // //Copy the remaining data
-    // while(fread(&byte, 1, sizeof(byte), input))
-    //     fwrite(&byte, 1, 1, output);
-
     return 0;
 }
