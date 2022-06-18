@@ -8,6 +8,11 @@
 #define LSB1 0
 #define LSB4 1
 #define LSBI 2
+#define GET_NTH_LSB(byte, n) ((byte >> (n-1) & 1))
+#define GET_INT_FROM_2_BITS(bit1, bit2) (2*bit1 + bit2)
+#define MATCHING 0
+#define NON_MATCHING 1
+
 
 typedef struct bmpFileHeader {
     uint16_t    type;
@@ -41,6 +46,7 @@ typedef struct bmpFile
   bmpImageHeader *imageHeader;
   uint8_t *data;
 } bmpFile;
+
 
 typedef struct file
 {

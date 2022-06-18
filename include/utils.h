@@ -5,7 +5,7 @@
 // #include "types.h"
 
 const char* getFileExtension(const char * path);
-int modifyBit(int number, int position, int bit);
+int modifyBit(unsigned char byte, int position, int bit);
 
 
 
