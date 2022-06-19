@@ -28,9 +28,6 @@ size_t extractSizeFromLSB1(bmpFile *bmp)
     size |= extractedByte << (8u * (3u - i));
   }
 
-  printf("size %d\n", size * 8);
-  printf("size 2 %d\n", bmp->imageHeader->imageSize);
-
   if (size * 8 > bmp->imageHeader->imageSize) return SIZE_ERROR;
 
   return size;
@@ -46,7 +43,7 @@ size_t extractSizeFromLSB4(bmpFile *bmp)
     size |= extractedByte << (8u * (3u - j));
   }
 
-  if (size * 2 != bmp->imageHeader->imageSize) return SIZE_ERROR;
+  if (size * 2 > bmp->imageHeader->imageSize) return SIZE_ERROR;
 
   return size;
 }
@@ -63,10 +60,10 @@ uint8_t extractByteFromLSB1(size_t byte, const uint8_t *data)
   for (int i = 0; i < BIT_SIZE; i++) 
   {
     uint8_t bit = data[byte*8 + i] & 1u;
-    printf("bit %d ", bit);
+    // printf("bit %d ", bit);
     extractedByte |= (uint8_t) (bit << (7u - i));
   }
-  printf("\n byte: %d\n", extractedByte);
+  // printf("\n byte: %d\n", extractedByte);
   return extractedByte;
 }
 

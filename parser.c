@@ -42,10 +42,8 @@ INPUT_RET parseInput (int argc, char* argv[], InputParams *inputParams) {
 
   while ((opt = getopt_long_only(argc, argv, "", longOptions, &optIndex)) != -1) 
   {
-    printf("%d\n", optIndex);
     currOption = longOptions[optIndex];
     opt = currOption.flag == NULL ? currOption.val : *(currOption.flag);
-    printf("%d\n", opt);
 
     switch (opt) {
       case 'b':
@@ -59,7 +57,6 @@ INPUT_RET parseInput (int argc, char* argv[], InputParams *inputParams) {
       case 'a':
       case 'm':
       case 'p':
-        printf("hola %s\n", optarg);
         if (optarg == NULL || optarg[0] == '-') // Consecutive parameters
           inputParams->status = MISSING_ARGUMENT;
         else
@@ -67,7 +64,6 @@ INPUT_RET parseInput (int argc, char* argv[], InputParams *inputParams) {
         break;
       default:
         if (optarg == NULL || optarg[0] == '-') {
-          printf("hola\n");
           return MISSING_ARGUMENT;
         }
         break;

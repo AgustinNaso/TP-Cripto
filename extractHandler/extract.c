@@ -25,8 +25,9 @@ EXTRACT_RET extract(bmpFile *bmp, InputParams inputParams, file *extractedFile)
   switch (inputParams.stego) 
   {
     case LSB1:
-      extractMessageFromLSB1(bmp->data + BYTES_FOR_SIZE, extractedFile->data, extractedFile->size);
-      extractExtensionFromLSB1(bmp->data + BYTES_FOR_SIZE, extractedFile->extension, extractedFile->size);
+      // Add 4 * 8 because for each byte we need 8 bytes of bmp data
+      extractMessageFromLSB1(bmp->data + BYTES_FOR_SIZE * 8, extractedFile->data, extractedFile->size);
+      extractExtensionFromLSB1(bmp->data + BYTES_FOR_SIZE * 8, extractedFile->extension, extractedFile->size);
       break;
     case LSB4:
       extractMessageFromLSB4(bmp->data + 8, extractedFile);
@@ -35,7 +36,7 @@ EXTRACT_RET extract(bmpFile *bmp, InputParams inputParams, file *extractedFile)
     case LSBI:
       break;
   }
-  
+  printf("SIZE: %d %d\n", currentEmbeddedSize, bmp->imageHeader->imageSize);
   return SUCCESS;
 }
 
@@ -45,7 +46,6 @@ void extractMessageFromLSB1(const uint8_t *data, uint8_t *extractedFile, size_t 
   {
     uint8_t extractedByte = extractByteFromLSB1(i, data);
     extractedFile[i] = extractedByte;
-    printf("extr: %zu %d\n", i, extractedFile[i]);
   }
 }
 
@@ -54,11 +54,10 @@ void extractExtensionFromLSB1(const uint8_t *data, uint8_t *extension, size_t si
   size_t i = size, j = 0;
   uint8_t extractedByte = 1;
 
-  while (i < size + 10) 
+  while (extractedByte != 0) 
   {
     extractedByte = extractByteFromLSB1(i++, data);
     extension[j++] = extractedByte;
-    printf("%zu %d\n", i-1, extension[j - 1]);
   }
 }
 
@@ -82,4 +81,5 @@ void extractExtensionFromLSB4(const uint8_t *data, file *extractedFile)
     extractedFile->extension[j++] = extractedByte;
     i += 2;
   }
+  printf("i: %zu %zu\n", i, j);
 }
