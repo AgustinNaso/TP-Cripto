@@ -1,6 +1,7 @@
 #include "../include/helper.h"
 #include "../include/types.h"
 #include <stdio.h>
+#include <stdlib.h>
 
 size_t extractSizeFromLSB1(bmpFile *bmp);
 size_t extractSizeFromLSB4(bmpFile *bmp);
@@ -60,10 +61,8 @@ uint8_t extractByteFromLSB1(size_t byte, const uint8_t *data)
   for (int i = 0; i < BIT_SIZE; i++) 
   {
     uint8_t bit = data[byte*8 + i] & 1u;
-    // printf("bit %d ", bit);
     extractedByte |= (uint8_t) (bit << (7u - i));
   }
-  // printf("\n byte: %d\n", extractedByte);
   return extractedByte;
 }
 
@@ -74,7 +73,7 @@ uint8_t extractByteFromLSB4(size_t byte, const uint8_t *data)
   // add first four bits shifted left four places
   extractedByte |= (uint8_t) ((data[byte] & 0x0Fu) << 4u);
   // add second four bits
-  extractedByte |= (data[byte + 1] & 0x0Fu);
+  extractedByte |= (uint8_t) (data[byte + 1] & 0x0Fu);
 
   return extractedByte;
 }
