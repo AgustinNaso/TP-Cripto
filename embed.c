@@ -4,7 +4,7 @@
 #include "include/fileHandler.h"
 #include "include/types.h"
 #include "include/utils.h"
-#include <openssl/aes.h>
+// #include <openssl/aes.h>
 
 
 void lsb4(unsigned char msgByte, FILE *input, FILE *output, int groups[4][2])
@@ -187,7 +187,7 @@ void embed(const char *bmpPath, const char *filePath, const char *outBmpName, in
         remove(filePath);
 }
 
-// int main(){
-//     embed("resources/lado.bmp", "salida.png","algo.bmp", LSB1, 1);
-//     return 0;
-// }
+int main(){
+    embed("resources/lado.bmp", "archivo1.png","algo.bmp", LSBI, 1);
+    return 0;
+}

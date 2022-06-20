@@ -32,7 +32,6 @@ EXTRACT_RET extract(bmpFile *bmp, InputParams inputParams, file *extractedFile)
     printf("Error: unable to extract file with specified steganography algorithm\n");
     return FAILURE;
   }
-  printf("img size %d\n", currentEmbeddedSize);
 
   extractedFile->data = malloc(currentEmbeddedSize);
   extractedFile->size = currentEmbeddedSize;
@@ -55,7 +54,7 @@ EXTRACT_RET extract(bmpFile *bmp, InputParams inputParams, file *extractedFile)
       extractExtensionFromLSBI(bmp->data + GROUPS + BYTES_FOR_SIZE * 8, extractedFile->extension, extractedFile->size, groups);
       break;
   }
-  printf("SIZE: %d %d\n", currentEmbeddedSize, bmp->imageHeader->imageSize);
+
   return SUCCESS;
 }
 

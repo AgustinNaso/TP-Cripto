@@ -45,8 +45,6 @@ size_t extractSizeFromLSBI(bmpFile *bmp, int groups[4])
     size |= extractedByte << (8u * (3u - i));
   }
 
-  printf("Size : %d %d\n", size, bmp->imageHeader->imageSize);
-
   if (size * 8 > bmp->imageHeader->imageSize) return SIZE_ERROR;
 
   return size;
@@ -84,7 +82,6 @@ uint8_t extractByteFromLSBI(size_t byte, const uint8_t *data, int groups[4])
   for (int i = 0; i < BIT_SIZE; i++) 
   {
     uint8_t bit = extractBitFromLSBI(byte * 8 + i, data, groups);
-    printf("real bit: %d\n", bit);
     extractedByte |= (uint8_t) (bit << (7u - i));
   }
 
@@ -93,12 +90,9 @@ uint8_t extractByteFromLSBI(size_t byte, const uint8_t *data, int groups[4])
 
 uint8_t extractBitFromLSBI(size_t byte, const uint8_t *data, int groups[4]) 
 {
-  printf("%d\n", data[byte]);
   uint8_t bit = GET_NTH_LSB(data[byte], 1);
   uint8_t secondLSB = GET_NTH_LSB(data[byte], 2);
   uint8_t thirdLSB = GET_NTH_LSB(data[byte], 3);
-
-  printf("grupo %d %d %d\n", GET_NTH_LSB(data[byte], 1), GET_INT_FROM_2_BITS(thirdLSB, secondLSB), groups[GET_INT_FROM_2_BITS(thirdLSB, secondLSB)]);
 
   if (groups[GET_INT_FROM_2_BITS(thirdLSB, secondLSB)] == 1) return (~bit) & 1u;
 
