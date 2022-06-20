@@ -10,18 +10,18 @@
 void lsb4(unsigned char msgByte, FILE *input, FILE *output, int groups[4][2])
 {
     unsigned char inputFileByte;
-    int i = 7;
+    int i = 8;
     fread(&inputFileByte, 1, 1, input);
-    for (; i >= 4; i--)
+    for (; i > 4; i--)
     {
-        char currBit = ((msgByte) >> i) & 1;
+        char currBit = GET_NTH_LSB(msgByte, i);
         inputFileByte = modifyBit(inputFileByte, i % 4, currBit);
     }
     fwrite(&inputFileByte, 1, 1, output);
     fread(&inputFileByte, 1, 1, input);
-    for (; i >= 0; i--)
+    for (; i > 0; i--)
     {
-        char currBit = ((msgByte) >> i) & 1;
+        char currBit = GET_NTH_LSB(msgByte, i);
         inputFileByte = modifyBit(inputFileByte, i, currBit);
     }
     fwrite(&inputFileByte, 1, 1, output);
@@ -30,12 +30,16 @@ void lsb4(unsigned char msgByte, FILE *input, FILE *output, int groups[4][2])
 void lsb1(unsigned char msgByte, FILE *input, FILE *output, int groups[4][2])
 {
     unsigned char inputFileByte;
-    for (int i = 7; i >= 0; i--)
+    printf("MsgByte "BYTE_TO_BINARY_PATTERN "\n", BYTE_TO_BINARY(msgByte));
+    for (int i = 8; i > 0; i--)
     {
         fread(&inputFileByte, 1, 1, input);
         char currBit = GET_NTH_LSB(msgByte, i);
+        printf("bit %d\n", currBit);
         // Insert currBit in least significant bit of inputFileByte
+        printf("fileByte  "BYTE_TO_BINARY_PATTERN"\n", BYTE_TO_BINARY(inputFileByte));
         inputFileByte = modifyBit(inputFileByte, 0, currBit);
+        printf("fileByte modified "BYTE_TO_BINARY_PATTERN "\n", BYTE_TO_BINARY(inputFileByte));
         fwrite(&inputFileByte, 1, 1, output);
     }
 }
@@ -94,7 +98,7 @@ void encrypt(const char * filePath, int encryptionType, int encryptionMode, cons
 
 }
 
-void embed(const char *bmpPath, const char *filePath, const char *outBmpName, int , bool hasEncryption)
+void embed(const char *bmpPath, const char *filePath, const char *outBmpName, int lsbType , int hasEncryption)
 {
     FILE *carrier = fopen(bmpPath, "r");
     FILE *fileToEmbed = fopen(filePath, "r");
@@ -146,11 +150,20 @@ void embed(const char *bmpPath, const char *filePath, const char *outBmpName, in
     // Embed extension
     for (int i = 0; i < strlen(fileExtension); i++)
         chosenStegAlgorithm(fileExtension[i], carrier, output, groups);
+    chosenStegAlgorithm('\0',carrier, output, groups);
 
     if (lsbType == LSBI)
     {
         fseek(carrier, headers_position, SEEK_SET);
         rewind(fileToEmbed);
+
+        //Inserting which patterns suffered modifications
+        for(int i = 0 ; i < 4 ; i++){
+            fread(&byte, 1, 1, carrier);
+            char groupBit = groups[i][MATCHING] < groups[i][NON_MATCHING];
+            byte = modifyBit(byte, 0, groupBit);
+            fwrite(&byte, 1, 1, output);
+        }
 
         for (char i = 0; i < 4; i++)
         {
@@ -163,13 +176,6 @@ void embed(const char *bmpPath, const char *filePath, const char *outBmpName, in
         // Embed extension
         for (int i = 0; i < strlen(fileExtension); i++)
             lsbiInsert(fileExtension[i], carrier, output, groups);
-        //Inserting which patterns suffered modifications
-        for(int i = 0 ; i < 4 ; i++){
-            fread(&byte, 1, 1, carrier);
-            char groupBit = groups[i][MATCHING] < groups[i][NON_MATCHING];
-            byte = modifyBit(byte, 0, groupBit);
-            fwrite(&byte, 1, 1, output);
-        }
     }
     // Copy the remaining data
     while (fread(&byte, 1, sizeof(byte), carrier))
@@ -177,6 +183,11 @@ void embed(const char *bmpPath, const char *filePath, const char *outBmpName, in
     fclose(fileToEmbed);
     fclose(carrier);
     fclose(output);
-    if(hasEncryption)
-        remove(filePath)
+    if(hasEncryption == 0)
+        remove(filePath);
+}
+
+int main(){
+    embed("resources/lado.bmp", "salida.png","algo.bmp", LSB1, 1);
+    return 0;
 }
