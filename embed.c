@@ -61,12 +61,12 @@ void lsbiScan(unsigned char msgByte, FILE *input, FILE *output, int groups[4][2]
     }
 }
 
-void lsbiInsert(unsigned char msgByte, FILE *input, FILE *output, int groups[4][2])
+void lsbiInsert(unsigned char msgByte, FILE *carrier, FILE *output, int groups[4][2])
 {
     unsigned char inputFileByte;
-    for (int i = 7; i >= 0; i--)
+    for (int i = 8; i > 0; i--)
     {
-        fread(&inputFileByte, 1, 1, input);
+        fread(&inputFileByte, 1, 1, carrier);
         char currBit = GET_NTH_LSB(msgByte, i);
         if (groups[0][0] != -1)
         {
@@ -74,7 +74,7 @@ void lsbiInsert(unsigned char msgByte, FILE *input, FILE *output, int groups[4][
             char secondLSB = GET_NTH_LSB(inputFileByte, 2);
             char thirdLSB = GET_NTH_LSB(inputFileByte, 3);
             if (groups[GET_INT_FROM_2_BITS(thirdLSB, secondLSB)][MATCHING] < groups[GET_INT_FROM_2_BITS(thirdLSB, secondLSB)][NON_MATCHING])
-                currBit = ~currBit;
+                currBit = ~currBit &1u;
         }
         inputFileByte = modifyBit(inputFileByte, 0, currBit);
         fwrite(&inputFileByte, 1, 1, output);
@@ -139,6 +139,9 @@ void embed(const char *bmpPath, const char *filePath, const char *outBmpName, in
 
     // Embed file size
     unsigned char byte;
+    if(lsbType == LSBI){
+        fseek(carrier, headers_position + 4, SEEK_SET);
+    }
     for (char i = 0; i < 4; i++)
     {
         byte = (sz >> (8 * (3 - i))) & 0xff;
@@ -161,6 +164,9 @@ void embed(const char *bmpPath, const char *filePath, const char *outBmpName, in
         for(int i = 0 ; i < 4 ; i++){
             fread(&byte, 1, 1, carrier);
             char groupBit = groups[i][MATCHING] < groups[i][NON_MATCHING];
+            printf("%d\n", groupBit);
+            printf("%d\n", groups[i][MATCHING]);
+            printf("%d\n----------\n", groups[i][NON_MATCHING]);
             byte = modifyBit(byte, 0, groupBit);
             fwrite(&byte, 1, 1, output);
         }
@@ -176,6 +182,7 @@ void embed(const char *bmpPath, const char *filePath, const char *outBmpName, in
         // Embed extension
         for (int i = 0; i < strlen(fileExtension); i++)
             lsbiInsert(fileExtension[i], carrier, output, groups);
+        //lsbiInsert('\0',carrier, output, groups);
     }
     // Copy the remaining data
     while (fread(&byte, 1, sizeof(byte), carrier))
@@ -188,6 +195,6 @@ void embed(const char *bmpPath, const char *filePath, const char *outBmpName, in
 }
 
 int main(){
-    embed("resources/lado.bmp", "archivo1.png","algo.bmp", LSBI, 1);
+    embed("resources/lado.bmp", "mensaje.txt","algo.bmp", LSBI, 1);
     return 0;
 }

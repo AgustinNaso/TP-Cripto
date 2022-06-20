@@ -5,8 +5,8 @@
 #include <stddef.h>
 #define HEADER_SIZE 54
 #define BITS_PER_PIXEL 24
-#define MATCHING 0
-#define NON_MATCHING 1
+#define MATCHING 1
+#define NON_MATCHING 0
 
 
 typedef struct bmpFileHeader {
