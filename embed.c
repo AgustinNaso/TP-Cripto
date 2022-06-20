@@ -187,7 +187,7 @@ void embed(const char *bmpPath, const char *filePath, const char *outBmpName, in
         remove(filePath);
 }
 
-int main(){
-    embed("resources/lado.bmp", "salida.png","algo.bmp", LSB1, 1);
-    return 0;
-}
+// int main(){
+//     embed("resources/lado.bmp", "salida.png","algo.bmp", LSB1, 1);
+//     return 0;
+// }
