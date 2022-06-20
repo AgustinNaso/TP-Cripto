@@ -58,7 +58,7 @@ void writeMessageToOutput(file *extractedFile, const char *outputFileName)
     fullOutputFileName = strcpy(fullOutputFileName, outputFileName);
     fullOutputFileName = strcat(fullOutputFileName, (char *) extractedFile->extension);
 
-    printf("%s\n", fullOutputFileName);
+    printf("%d\n", extractedFile->extension[0]);
 
     FILE *fd = fopen(fullOutputFileName, "w+"); // reading necessary?
     fwrite(extractedFile->data, extractedFile->size, 1, fd);
