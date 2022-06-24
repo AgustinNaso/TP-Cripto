@@ -4,28 +4,13 @@
 #include <openssl/bio.h>
 #include <string.h>
 #include <openssl/evp.h>
-
+#include "include/fileHandler.h"
+#include "include/types.h"
 #define BLOCK_SIZE 8
 #define SUCCESS 0
 #define FAILURE 1
-
-int Encrypt(unsigned char *in, int inl, unsigned char *out, DES_key_schedule *ks);
-unsigned char *padding(unsigned char *in, int *inl, size_t blocksize);
-int saveEncryptedData(unsigned char *out, int len, unsigned char *where);
-
-unsigned char *padding(unsigned char *in, int *inl, size_t blocksize)
-{
-    int pad;
-    int i;
-    unsigned char *inPad;
-    pad = blocksize - (*inl) % blocksize;
-    inPad = malloc(*inl + pad);
-    memcpy(inPad, in, *inl);
-    for (i = (*inl); i < (*inl + pad); i++)
-        inPad[i] = pad;
-    *inl += pad;
-    return (inPad);
-}
+#define MAX_ENCR_LENGTH 1024
+#define KEY_LENGTH 16
 
 int saveEncryptedData(unsigned char *out, int len, unsigned char *where)
 {
@@ -44,62 +29,92 @@ int saveEncryptedData(unsigned char *out, int len, unsigned char *where)
     return SUCCESS;
 }
 
-int Encrypt(unsigned char *in, int inl, unsigned char *out, DES_key_schedule *ks)
+void showKey(unsigned char key[])
 {
-    DES_cblock inB;
-    DES_cblock outB;
-    int numB;
     int i;
-    numB = inl / BLOCK_SIZE;
-    for (i = 0; i < numB; i++)
-    {
-        memcpy(inB, in + i * BLOCK_SIZE, BLOCK_SIZE);
-        DES_ecb_encrypt(&inB, &outB, ks, DES_ENCRYPT);
-        memcpy(out + i * BLOCK_SIZE, outB, BLOCK_SIZE);
-    }
-    return 1;
+    for (i = 0; i < 16; i++)
+        printf("%0x", key[i]);
 }
 
-int des_enc(const char * filePath, int mode)
+const EVP_CIPHER *getCipherAndMode(int algorithm, int mode)
 {
+    char cipherName[14] = {0};
+    OpenSSL_add_all_ciphers();
 
-    FILE *fileptr;
-    unsigned char *buffer;
-    long filelen;
+    switch (algorithm)
+    {
+    case AES_128:
+        strncpy(cipherName, "aes-128-", 9);
+        break;
+    case AES_192:
+        strncpy(cipherName, "aes-192-", 9);
+        break;
+    case AES_256:
+        strncpy(cipherName, "aes-256-", 9);
+        break;
+    case DES:
+        strncpy(cipherName, "des-", 5);
+        break;
+    default:
+        return NULL;
+    }
 
-    fileptr = fopen(filePath, "rb");  // Open the file in binary mode
-    fseek(fileptr, 0, SEEK_END);          // Jump to the end of the file
-    filelen = ftell(fileptr);             // Get the current byte offset in the file
-    rewind(fileptr);                      // Jump back to the beginning of the file
+    switch (mode)
+    {
+    case ECB:
+        strncat(cipherName, "ecb", 4);
+        break;
+    case CFB:
+        strncat(cipherName, "cfb8", 5);
+        break;
+    case OFB:
+        strncat(cipherName, "ofb8", 5);
+        break;
+    case CBC:
+        strncat(cipherName, "cbc", 4);
+        break;
+    default:
+        return NULL;
+    }
 
-    buffer = (char *)malloc(filelen * sizeof(char)); // Enough memory for the file
-    fread(buffer, filelen, 1, fileptr); // Read in the entire file
-    fclose(fileptr); // Close the file
+    return EVP_get_cipherbyname(cipherName);
+}
 
-    unsigned char *nomArch = "des-ecb.txt";
-    unsigned char *inPad;
-    unsigned char *out;
-    int inl, outl;
-    DES_cblock k = "1";
-    DES_key_schedule ks;
-    /* Setear paridad impar*/
-    DES_set_odd_parity(&k);
-    /* Setear key schedule*/
-    DES_set_key_checked(&k, &ks);
-    /* Completar con padding*/
-    inl = strlen(buffer);
-    inPad = padding(buffer, &inl, BLOCK_SIZE);
-    /* Modo ecb encripta de a BLOQUES*/
-    out = malloc(inl);
-    outl = inl;
-    Encrypt(inPad, inl, out, &ks);
-    saveEncryptedData(out, outl, nomArch);
-    free(inPad);
-    free(out);
+int encrypt(const unsigned char *password, const unsigned char *toEncrypt, int cipherAlgo, int mode)
+{
+    const EVP_CIPHER *selectedEncryptAlgorithm = getCipherAndMode(cipherAlgo, mode);
+    unsigned char key[KEY_LENGTH];
+    unsigned char * iv = malloc(sizeof(char)*KEY_LENGTH);
+    printf("Clave : %d bytes.\n", EVP_CIPHER_key_length(EVP_aes_128_cbc()));
+    printf("IV : %d bytes.\n", EVP_CIPHER_iv_length(EVP_aes_128_cbc()));
+    EVP_BytesToKey(EVP_aes_128_cbc(), EVP_md5(), NULL, password, strlen(password), 1, key, iv);
+    unsigned char *fileName = "encriptado.txt";
+    unsigned char out[MAX_ENCR_LENGTH];
+    printf("Key derivada: ");
+    showKey(key);
+    printf("\nIV derivado: ");
+    showKey(iv);
+    int outlen, templ, inl;
+    EVP_CIPHER_CTX *ctx;
+    ctx = EVP_CIPHER_CTX_new();
+    EVP_CIPHER_CTX_init(ctx);
+    // Parametros para contexto de encripcion
+    if(mode == ECB) {iv = NULL;}
+    printf("\nadd %p", iv);
+    EVP_EncryptInit_ex(ctx, selectedEncryptAlgorithm, NULL, key, iv);
+    inl = strlen(toEncrypt);
+    // Encripto
+    EVP_EncryptUpdate(ctx, out, &outlen, toEncrypt, inl);
+    printf("\nencriptadoas %d bytes\n", outlen);
+    EVP_EncryptFinal(ctx, out + outlen, &templ);
+    printf("encriptados ultimos %d bytes\n", templ);
+    saveEncryptedData(out, outlen + templ, fileName);
+    EVP_CIPHER_CTX_cleanup(ctx);
     return EXIT_SUCCESS;
 }
 
-int main(){
-    des_enc("msg.txt",1);
+int main()
+{
+    encrypt("testing", "textoocultomensaje", AES_128, ECB);
     return 0;
 }

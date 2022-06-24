@@ -182,7 +182,7 @@ void embed(const char *bmpPath, const char *filePath, const char *outBmpName, in
         // Embed extension
         for (int i = 0; i < strlen(fileExtension); i++)
             lsbiInsert(fileExtension[i], carrier, output, groups);
-        //lsbiInsert('\0',carrier, output, groups);
+        lsbiInsert('\0',carrier, output, groups);
     }
     // Copy the remaining data
     while (fread(&byte, 1, sizeof(byte), carrier))
