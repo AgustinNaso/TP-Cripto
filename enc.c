@@ -80,7 +80,7 @@ const EVP_CIPHER *getCipherAndMode(int algorithm, int mode)
     return EVP_get_cipherbyname(cipherName);
 }
 
-int encrypt(const unsigned char *password, const unsigned char *toEncrypt, int cipherAlgo, int mode)
+char * encrypt(const unsigned char *password, const unsigned char *toEncrypt, int cipherAlgo, int mode)
 {
     const EVP_CIPHER *selectedEncryptAlgorithm = getCipherAndMode(cipherAlgo, mode);
     unsigned char key[KEY_LENGTH];
@@ -110,11 +110,11 @@ int encrypt(const unsigned char *password, const unsigned char *toEncrypt, int c
     printf("encriptados ultimos %d bytes\n", templ);
     saveEncryptedData(out, outlen + templ, fileName);
     EVP_CIPHER_CTX_cleanup(ctx);
-    return EXIT_SUCCESS;
+    return fileName;
 }
 
-int main()
-{
-    encrypt("testing", "textoocultomensaje", AES_128, ECB);
-    return 0;
-}
+// int main()
+// {
+//     encrypt("testing", "textoocultomensaje", AES_128, ECB);
+//     return 0;
+// }
