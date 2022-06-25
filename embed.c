@@ -14,21 +14,15 @@ void lsb4(unsigned char msgByte, FILE *input, FILE *output, int groups[4][2])
     fread(&inputFileByte, 1, 1, input);
     for (; i > 4; i--)
     {
-        printf("\n " BYTE_TO_BINARY_PATTERN, BYTE_TO_BINARY(inputFileByte));
         char currBit = GET_NTH_LSB(msgByte, i);
-        printf("\n currBit: %d", currBit);
         inputFileByte = modifyBit(inputFileByte, i -1 - 4 , currBit);
-        printf("\n "BYTE_TO_BINARY_PATTERN, BYTE_TO_BINARY(inputFileByte));
     }
     fwrite(&inputFileByte, 1, 1, output);
     fread(&inputFileByte, 1, 1, input);
     for (; i > 0; i--)
     {
-        printf("\n 2da mitad" BYTE_TO_BINARY_PATTERN, BYTE_TO_BINARY(inputFileByte));
         char currBit = GET_NTH_LSB(msgByte, i);
-        printf("\n currBit: %d", currBit);
         inputFileByte = modifyBit(inputFileByte,  i - 1, currBit);
-        printf("\n 2da mitad" BYTE_TO_BINARY_PATTERN, BYTE_TO_BINARY(inputFileByte));
     }
     fwrite(&inputFileByte, 1, 1, output);
 }
@@ -113,7 +107,6 @@ void embed(const char *bmpPath, const char *filePath, const char *outBmpName, in
     fseek(fileToEmbed, 0L, SEEK_END);
     uint32_t sz = ftell(fileToEmbed);
     rewind(fileToEmbed);
-    printf("%s\n",outBmpName);
     FILE *output = fopen(outBmpName, "wb");
     bmpFileHeader bfh;
     bmpImageHeader bih;
@@ -157,9 +150,6 @@ void embed(const char *bmpPath, const char *filePath, const char *outBmpName, in
         {
             fread(&byte, 1, 1, carrier);
             char groupBit = groups[i][MATCHING] < groups[i][NON_MATCHING];
-            printf("%d\n", groupBit);
-            printf("%d\n", groups[i][MATCHING]);
-            printf("%d\n----------\n", groups[i][NON_MATCHING]);
             byte = modifyBit(byte, 0, groupBit);
             fwrite(&byte, 1, 1, output);
         }
@@ -227,15 +217,12 @@ int handleEmbedding(char * fileToEmbed, char * carrierPath, char * embeddedFileN
     FILE * fp = fopen(fileToEmbed, "r+");
     fseek(fp, 0L, SEEK_END);
     uint32_t sz = ftell(fp);
-    printf(" file size %d\n", sz);
     rewind(fp);
     const char * extension = getFileExtension(fileToEmbed);
-    printf("ext %s %ld\n", extension, strlen(extension));
     int dataLen = sz + 4 + strlen(extension) + 1;
     unsigned char * data = malloc(sizeof(char) * (dataLen));
     sizeTo4ByteArray(sz, data);
     fread(data + 4, sz, 1, fp);
-    printf("char %d %d %d %d\n", data[0], data[1], data[2], data[3]);
     for(int i = 0 ; i < strlen(extension); i++)
         data[sz + 4 + i] = extension[i];
     char * filePath = fileToEmbed;
@@ -245,7 +232,6 @@ int handleEmbedding(char * fileToEmbed, char * carrierPath, char * embeddedFileN
     for(int i = 4 ; i< sz + 4 + strlen(extension); i++)
         printf("%c", data[i]);
     data[sz + 4 + strlen(extension)] = 0;
-    printf("\nenc %d\n", encrypted);
     if(encrypted != 0)
         filePath = encrypt(password, data, encryptAlgo, encryptMode, dataLen);
     embed(carrierPath, filePath, embeddedFileName, embedMode, encrypted);
@@ -253,7 +239,3 @@ int handleEmbedding(char * fileToEmbed, char * carrierPath, char * embeddedFileN
     free(data);
     return 0;
 }
-
-// int main(){
-//     handleEmbedding("mesaje.txt", "resources/lado.bmp", "embedded.bmp", LSB1, 1, AES_128, CBC, "contrasenia");
-// }
