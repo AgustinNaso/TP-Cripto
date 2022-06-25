@@ -12,5 +12,6 @@ typedef enum EXTRACT_RET
 } EXTRACT_RET;
 
 EXTRACT_RET extract(bmpFile *bmp, InputParams inputParams, file *extractedFile);
+uint32_t getSizeFromPointer(const uint8_t *pointer);
 
 #endif

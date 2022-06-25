@@ -105,3 +105,22 @@ void extractActiveGroupBits(const uint8_t *data, int groups[4])
     groups[i] = data[i] & 1u;
   }
 }
+
+uint32_t getSizeFromPointer(const uint8_t *pointer)
+{
+    uint32_t size = 0;
+
+    for (int i = 0; i < BYTES_FOR_SIZE; i++) {
+      size |= (uint32_t) (pointer[i] << (8u * (3u - i)));
+    }
+
+    return size;
+}
+
+void extractFileExtension(file *extractedFile, const uint8_t *data) 
+{
+  int i = 0;
+  while (data[i] != 0) {
+    extractedFile->extension[i] = data[i++];
+  }
+}

@@ -1,5 +1,7 @@
 #include "include/utils.h"
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 const char* getFileExtension(const char * path)
 {
@@ -23,4 +25,9 @@ int modifyBit(unsigned char byte, int position, int bit)
 {
     int mask = 1 << position;
     return ((byte & ~mask) | (bit << position));
+}
+
+void errorHandler(const char *errorMessage) {
+    fprintf(stderr, "Failed to %s\n", errorMessage);
+    exit(0);
 }

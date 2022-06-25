@@ -19,5 +19,6 @@ size_t extractSizeFromLSBI(bmpFile *bmp, int groups[4]);
 uint8_t extractByteFromLSB1(size_t byte, const uint8_t *data);
 uint8_t extractByteFromLSB4(size_t byte, const uint8_t *data);
 uint8_t extractByteFromLSBI(size_t byte, const uint8_t *data, int groups[4]);
+void extractFileExtension(file *extractedFile, const uint8_t *data);
 
 #endif

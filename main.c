@@ -4,6 +4,7 @@
 #include "include/parser.h"
 #include "include/fileHandler.h"
 #include "include/extract.h"
+#include "include/types.h"
 
 static InputParams inputParams;
 
