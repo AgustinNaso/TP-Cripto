@@ -58,7 +58,6 @@ uint8_t *decryptMessage(const uint8_t *ciphertext, InputParams inputParams, size
     // printf("\n%s\n",(char *) ciphertext);
     if (EVP_DecryptUpdate(context, decryption, &length, ciphertext, size) != 1)
         errorHandler("decrypt ciphertext");
-     printf("\n DECRIPTION\n %s\n",(char *) decryption);
     /*
      * Finalize the decryption. Further plaintext bytes may be written at
      * this stage.

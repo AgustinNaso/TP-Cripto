@@ -187,20 +187,50 @@ void embed(const char *bmpPath, const char *filePath, const char *outBmpName, in
     fclose(fileToEmbed);
     fclose(carrier);
     fclose(output);
-    // if (hasEncryption)
-    //     remove(filePath);
+    if (hasEncryption)
+        remove(filePath);
+}
+
+int checkCarrierSize(char * fileToEmbed, char * carrierPath, int stegMode){
+    FILE * fp = fopen(fileToEmbed, "r+");
+    fseek(fp, 0L, SEEK_END);
+    uint32_t fileToEmbedSize = ftell(fp);
+    fclose(fp)
+    fp = fopen(carrierPath, "r+");
+    fseek(fp, 0L, SEEK_END);
+    uint32_t carrierSize = ftell(fp);
+    fclose(fp)
+    int sizeDifference =-1;
+    switch (stegMode)
+    {
+    case LSB1:
+        sizeDifference  = carrierSize - fileToEmbedSize * 8;
+        break;
+    case LSB4:
+        sizeDifference  = carrierSize - fileToEmbedSize * 4;
+        break;
+    case LSBI:
+        sizeDifference  = carrierSize - (fileToEmbedSize * 8 + 4)
+    break;
+    default:
+        break;
+    }
+    return sizeDifference;
 }
 
 int handleEmbedding(char * fileToEmbed, char * carrierPath, char * embeddedFileName, int embedMode, int encryptAlgo, int encryptMode, unsigned char * password)
 {
-    // bmpFile bmp = parseBmpFile(carrierPath);
+    if(checkCarrierSize(fileToEmbed, carrierPath, embed) < 0){
+        printf("File to embed doesn't fit in carrier\n");
+        return -1;
+    }
     FILE * fp = fopen(fileToEmbed, "r+");
     fseek(fp, 0L, SEEK_END);
     uint32_t sz = ftell(fp);
     printf(" file size %d\n", sz);
     rewind(fp);
     const char * extension = getFileExtension(fileToEmbed);
-    printf("ext %s %d\n", extension, strlen(extension));
+    printf("ext %s %ld\n", extension, strlen(extension));
     int dataLen = sz + 4 + strlen(extension) + 1;
     unsigned char * data = malloc(sizeof(char) * (dataLen));
     sizeTo4ByteArray(sz, data);
@@ -221,7 +251,6 @@ int handleEmbedding(char * fileToEmbed, char * carrierPath, char * embeddedFileN
     embed(carrierPath, filePath, embeddedFileName, embedMode, encrypted);
     fclose(fp);
     free(data);
-
     return 0;
 }
 

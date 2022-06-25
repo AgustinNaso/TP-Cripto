@@ -9,7 +9,7 @@
 #define BLOCK_SIZE 8
 #define SUCCESS 0
 #define FAILURE 1
-#define MAX_ENCR_LENGTH 1024
+#define MAX_ENCR_LENGTH 4096
 #define KEY_LENGTH 16
 
 int saveEncryptedData(unsigned char *out, int len, char *where)
@@ -30,10 +30,10 @@ int saveEncryptedData(unsigned char *out, int len, char *where)
     return SUCCESS;
 }
 
-void showKey(unsigned char key[])
+void showKey(unsigned char key[], int keySize)
 {
     int i;
-    for (i = 0; i < 16; i++)
+    for (i = 0; i < keySize; i++)
         printf("%0x", key[i]);
 }
 
@@ -59,17 +59,16 @@ const EVP_CIPHER *getCipherAndMode(int algorithm, int mode)
     default:
         return NULL;
     }
-
     switch (mode)
     {
     case ECB:
         strncat(cipherName, "ecb", 4);
         break;
     case CFB:
-        strncat(cipherName, "cfb8", 5);
+        strncat(cipherName, "cfb1", 5);
         break;
     case OFB:
-        strncat(cipherName, "ofb8", 5);
+        strncat(cipherName, "ofb", 4);
         break;
     case CBC:
         strncat(cipherName, "cbc", 4);
@@ -77,6 +76,8 @@ const EVP_CIPHER *getCipherAndMode(int algorithm, int mode)
     default:
         return NULL;
     }
+
+    printf("name %s\n", cipherName);
 
     return EVP_get_cipherbyname(cipherName);
 }
@@ -86,30 +87,27 @@ char * encrypt(const unsigned char *password, const unsigned char *toEncrypt, in
 
     const EVP_CIPHER *selectedEncryptAlgorithm = getCipherAndMode(cipherAlgo, mode);
     int keyLength = EVP_CIPHER_key_length(selectedEncryptAlgorithm);
-    int ivLength = EVP_CIPHER_key_length(selectedEncryptAlgorithm);
-    printf("Clave : %d bytes.\n", EVP_CIPHER_key_length(selectedEncryptAlgorithm));
-    printf("IV : %d bytes.\n", EVP_CIPHER_iv_length(selectedEncryptAlgorithm));
-    unsigned char * key = malloc(sizeof(char)*keyLength);
-    unsigned char * iv = malloc(sizeof(char)*ivLength);
+    int ivLength = EVP_CIPHER_iv_length(selectedEncryptAlgorithm);
+    printf("Clave : %d bytes.\n", keyLength);
+    printf("IV : %d bytes.\n", ivLength);
+    unsigned char * key = malloc(sizeof(unsigned char)*keyLength);
+    unsigned char * iv = malloc(sizeof(unsigned char)*ivLength);
     EVP_BytesToKey(selectedEncryptAlgorithm, EVP_sha256(), NULL, password, strlen((char *)password), 1, key, iv);
     char *fileName = "encriptado.txt";
     unsigned char out[MAX_ENCR_LENGTH];
     printf("Key derivada: ");
-    showKey(key);
+    showKey(key, keyLength);
     printf("\nIV derivado: ");
-    showKey(iv);
-    int outlen, templ, inl;
+    showKey(iv, ivLength);
+    int outlen, templ;
     EVP_CIPHER_CTX *ctx;
     ctx = EVP_CIPHER_CTX_new();
     EVP_CIPHER_CTX_init(ctx);
     // Parametros para contexto de encripcion
-    if(mode == ECB) {iv = NULL;}
-    printf("\nadd %p", iv);
     EVP_EncryptInit_ex(ctx, selectedEncryptAlgorithm, NULL, key, iv);
-    inl = dataLen;
-    printf("\ninl %d", inl);
+    printf("\ndataLen %d", dataLen);
     // Encripto
-    EVP_EncryptUpdate(ctx, out, &outlen, toEncrypt , inl);
+    EVP_EncryptUpdate(ctx, out, &outlen, toEncrypt , dataLen);
     printf("\nencriptados %d bytes\n", outlen);
 
     EVP_EncryptFinal(ctx, out + outlen, &templ);
@@ -118,7 +116,8 @@ char * encrypt(const unsigned char *password, const unsigned char *toEncrypt, in
     printf("\n out len %d\n", outlen + templ);
     fwrite(out, 1, outlen + templ, fp);
     fclose(fp);
-    //saveEncryptedData(out, outlen + templ, fileName);
     EVP_CIPHER_CTX_cleanup(ctx);
+    free(key);
+    free(iv);
     return fileName;
 }
