@@ -19,12 +19,16 @@ uint8_t *decryptMessage(const uint8_t *ciphertext, InputParams inputParams, size
     {
     case AES_128:
         cipher = getCipherTypeForAES128(inputParams.mode);
+        break;
     case AES_192:
         cipher = getCipherTypeForAES192(inputParams.mode);
+        break;
     case AES_256:
         cipher = getCipherTypeForAES256(inputParams.mode);
+        break;
     case DES:
         cipher = getCipherTypeForDES(inputParams.mode);
+        break;
     default:
         break;
     }
@@ -34,7 +38,7 @@ uint8_t *decryptMessage(const uint8_t *ciphertext, InputParams inputParams, size
     uint8_t *key = malloc(keyLength);
     uint8_t *iv = malloc(keyLength);
 
-    EVP_BytesToKey(cipher, EVP_md5(), NULL, inputParams.password, (int)strlen((char *)inputParams.password), 1, key, iv);
+    EVP_BytesToKey(cipher,EVP_sha256(), NULL, inputParams.password, (int)strlen((char *)inputParams.password), 1, key, iv);
 
     /* Create and initialize the context */
     if (!(context = EVP_CIPHER_CTX_new()))
@@ -51,14 +55,15 @@ uint8_t *decryptMessage(const uint8_t *ciphertext, InputParams inputParams, size
     /*
      * Provide the message to be decrypted, and obtain the plaintext output.
      */
+    // printf("\n%s\n",(char *) ciphertext);
     if (EVP_DecryptUpdate(context, decryption, &length, ciphertext, size) != 1)
         errorHandler("decrypt ciphertext");
-
+     printf("\n DECRIPTION\n %s\n",(char *) decryption);
     /*
      * Finalize the decryption. Further plaintext bytes may be written at
      * this stage.
      */
-    if (EVP_DecryptFinal_ex(context, decryption + length, &length) != 1)
+    if (EVP_DecryptFinal_ex(context, decryption + length, &length) <= 0)
         errorHandler("finalize decryption");
 
     /* Clean up */

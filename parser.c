@@ -145,7 +145,7 @@ void parseParamWithArg(int opt, InputParams *inputParams)
     strcpy(inputParams->carrierFile, optarg);
     break;
   case 'o':
-    if (inputParams->operation == EMBED && parseBMPFile(optarg, inputParams) != BMP_ERROR) return;
+    if (inputParams->operation == EMBED && parseBMPFile(optarg, inputParams) == BMP_ERROR) return;
     inputParams->outputFile = calloc(strlen(optarg) + 1, sizeof(char));
     strcpy(inputParams->outputFile, optarg);
     break;
