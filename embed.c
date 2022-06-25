@@ -207,6 +207,6 @@ int handleEmbedding(char * fileToEmbed, char * carrierPath, char * embeddedFileN
     return 0;
 }
 
-int main(){
-    handleEmbedding("mesaje.txt", "resources/lado.bmp", "embedded.bmp", LSB1, 1, AES_128, CBC, "contrasenia");
-}
+// int main(){
+//     handleEmbedding("mesaje.txt", "resources/lado.bmp", "embedded.bmp", LSB1, 1, AES_128, CBC, "contrasenia");
+// }

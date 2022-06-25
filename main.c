@@ -61,7 +61,10 @@ int main(int argc, char* argv[])
             writeMessageToOutput(extractedFile, inputParams.outputFile);
 
         }
+        freeBmpFile(bmp);
+        freeFile(extractedFile);
     }
+
 
     return EXIT_SUCCESS;
 }
