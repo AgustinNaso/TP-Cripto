@@ -1,13 +1,13 @@
 Program to embed and extract files from .bmp with different steganography strategies: LSB1, LSB4 and LSBI.
 
 # Authors
-- [Agustín Naso]
-- [Gaston De Schant]
-- [Brittany Lin]
+- Agustín Naso
+- Gaston De Schant
+- Brittany Lin
 
 # Requirements
-- [OpenSSL]
-- [C compiler]
+- OpenSSL
+- C compiler
 
 # Compilation
 
