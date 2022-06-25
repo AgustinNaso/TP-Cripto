@@ -2,7 +2,7 @@
 #define UTILS_H
 
 // #include <openssl/evp.h>
-// #include "types.h"
+#include "fileHandler.h"
 #define GET_NTH_LSB(byte, n) ((byte >> (n-1) & 1))
 #define GET_INT_FROM_2_BITS(bit1, bit2) (2*bit1 + bit2)
 #define BYTE_TO_BINARY_PATTERN "%c%c%c%c%c%c%c%c"
@@ -18,7 +18,10 @@
 
 const char* getFileExtension(const char * path);
 int modifyBit(unsigned char byte, int position, int bit);
-void sizeTo4ByteArray(int sz, char * size);
+void errorHandler(const char *errorMessage);
+void sizeTo4ByteArray(int sz, unsigned char * size);
+void freeBmpFile(bmpFile * bmp);
+void freeFile(file * file);
 
 
 
