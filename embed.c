@@ -193,9 +193,13 @@ int handleEmbedding(char * fileToEmbed, char * carrierPath, char * embeddedFileN
     fseek(fp, 0L, SEEK_END);
     uint32_t sz = ftell(fp);
     rewind(fp);
-    unsigned char data[sz];
-    fread(data, sz, 1, fp);
+    const char * extension = getFileExtension(fileToEmbed);
+    unsigned char data[sz + 4 + strlen(extension)];
+    sizeTo4ByteArray(sz, data);
+    printf("\n char %d %d %d %d\n", data[0], data[1], data[2], data[3]);
+    fread(data + 4, sz, 1, fp);
     fclose(fp);
+    strncpy(data + sz + 4, extension, strlen(extension));
     char * filePath = fileToEmbed;
     if(encrypt)
         filePath = encrypt(password, data, encryptAlgo, encryptMode);
@@ -203,6 +207,6 @@ int handleEmbedding(char * fileToEmbed, char * carrierPath, char * embeddedFileN
     return 0;
 }
 
-// int main(){
-//     handleEmbedding("mensaje.txt", "resources/lado.bmp", "embedded.bmp", LSB1, 1, AES_128, CBC, "contrasenia");
-// }
+int main(){
+    handleEmbedding("mesaje.txt", "resources/lado.bmp", "embedded.bmp", LSB1, 1, AES_128, CBC, "contrasenia");
+}

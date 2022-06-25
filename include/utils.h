@@ -18,6 +18,8 @@
 
 const char* getFileExtension(const char * path);
 int modifyBit(unsigned char byte, int position, int bit);
-void errorHandler(const char *errorMessage);
+void sizeTo4ByteArray(int sz, char * size);
+
+
 
 #endif

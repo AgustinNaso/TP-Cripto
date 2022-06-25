@@ -31,3 +31,12 @@ void errorHandler(const char *errorMessage) {
     fprintf(stderr, "Failed to %s\n", errorMessage);
     exit(0);
 }
+
+void sizeTo4ByteArray(int sz, char * size){
+    char byte;
+    for (char i = 0; i < 4; i++)
+    {
+        byte = (sz >> (8 * (3 - i))) & 0xff;
+        size[i] = byte;
+    }
+}
