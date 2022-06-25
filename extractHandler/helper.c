@@ -61,7 +61,6 @@ uint8_t extractByteFromLSB1(size_t byte, const uint8_t *data)
     uint8_t bit = data[byte * 8 + i] & 1u;
     extractedByte |= (uint8_t) (bit << (7u - i));
   }
-
   return extractedByte;
 }
 

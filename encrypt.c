@@ -14,6 +14,7 @@
 
 int saveEncryptedData(unsigned char *out, int len, char *where)
 {
+    printf("len %d \n", len);
     BIO *b64;
     BIO *bio;
     b64 = BIO_new(BIO_f_base64());
@@ -80,14 +81,17 @@ const EVP_CIPHER *getCipherAndMode(int algorithm, int mode)
     return EVP_get_cipherbyname(cipherName);
 }
 
-char * encrypt(const unsigned char *password, const unsigned char *toEncrypt, int cipherAlgo, int mode)
+char * encrypt(const unsigned char *password, const unsigned char *toEncrypt, int cipherAlgo, int mode, int dataLen)
 {
+
     const EVP_CIPHER *selectedEncryptAlgorithm = getCipherAndMode(cipherAlgo, mode);
-    unsigned char key[KEY_LENGTH];
-    unsigned char * iv = malloc(sizeof(char)*KEY_LENGTH);
-    printf("Clave : %d bytes.\n", EVP_CIPHER_key_length(EVP_aes_128_cbc()));
-    printf("IV : %d bytes.\n", EVP_CIPHER_iv_length(EVP_aes_128_cbc()));
-    EVP_BytesToKey(EVP_aes_128_cbc(), EVP_md5(), NULL, password, strlen((char *)password), 1, key, iv);
+    int keyLength = EVP_CIPHER_key_length(selectedEncryptAlgorithm);
+    int ivLength = EVP_CIPHER_key_length(selectedEncryptAlgorithm);
+    printf("Clave : %d bytes.\n", EVP_CIPHER_key_length(selectedEncryptAlgorithm));
+    printf("IV : %d bytes.\n", EVP_CIPHER_iv_length(selectedEncryptAlgorithm));
+    unsigned char * key = malloc(sizeof(char)*keyLength);
+    unsigned char * iv = malloc(sizeof(char)*ivLength);
+    EVP_BytesToKey(selectedEncryptAlgorithm, EVP_sha256(), NULL, password, strlen((char *)password), 1, key, iv);
     char *fileName = "encriptado.txt";
     unsigned char out[MAX_ENCR_LENGTH];
     printf("Key derivada: ");
@@ -102,19 +106,19 @@ char * encrypt(const unsigned char *password, const unsigned char *toEncrypt, in
     if(mode == ECB) {iv = NULL;}
     printf("\nadd %p", iv);
     EVP_EncryptInit_ex(ctx, selectedEncryptAlgorithm, NULL, key, iv);
-    inl = strlen((char *)toEncrypt);
+    inl = dataLen;
+    printf("\ninl %d", inl);
     // Encripto
-    EVP_EncryptUpdate(ctx, out, &outlen, toEncrypt, inl);
-    printf("\nencriptadoas %d bytes\n", outlen);
+    EVP_EncryptUpdate(ctx, out, &outlen, toEncrypt , inl);
+    printf("\nencriptados %d bytes\n", outlen);
+
     EVP_EncryptFinal(ctx, out + outlen, &templ);
     printf("encriptados ultimos %d bytes\n", templ);
-    saveEncryptedData(out, outlen + templ, fileName);
+    FILE * fp = fopen(fileName, "wb");
+    printf("\n out len %d\n", outlen + templ);
+    fwrite(out, 1, outlen + templ, fp);
+    fclose(fp);
+    //saveEncryptedData(out, outlen + templ, fileName);
     EVP_CIPHER_CTX_cleanup(ctx);
     return fileName;
 }
-
-// int main()
-// {
-//     encrypt("testing", "textoocultomensaje", AES_128, ECB);
-//     return 0;
-// }

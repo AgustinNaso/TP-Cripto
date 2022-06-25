@@ -36,16 +36,12 @@ void lsb4(unsigned char msgByte, FILE *input, FILE *output, int groups[4][2])
 void lsb1(unsigned char msgByte, FILE *input, FILE *output, int groups[4][2])
 {
     unsigned char inputFileByte;
-    printf("MsgByte " BYTE_TO_BINARY_PATTERN "\n", BYTE_TO_BINARY(msgByte));
     for (int i = 8; i > 0; i--)
     {
         fread(&inputFileByte, 1, 1, input);
         char currBit = GET_NTH_LSB(msgByte, i);
-        printf("bit %d\n", currBit);
         // Insert currBit in least significant bit of inputFileByte
-        printf("fileByte  " BYTE_TO_BINARY_PATTERN "\n", BYTE_TO_BINARY(inputFileByte));
         inputFileByte = modifyBit(inputFileByte, 0, currBit);
-        printf("fileByte modified " BYTE_TO_BINARY_PATTERN "\n", BYTE_TO_BINARY(inputFileByte));
         fwrite(&inputFileByte, 1, 1, output);
     }
 }
@@ -144,12 +140,12 @@ void embed(const char *bmpPath, const char *filePath, const char *outBmpName, in
     while (fread(&byte, 1, sizeof(byte), fileToEmbed) == 1)
         chosenStegAlgorithm(byte, carrier, output, groups);
     // Embed extension
-    if (hasEncryption != 0)
+    if (hasEncryption == 0)
     {
         for (int i = 0; i < strlen(fileExtension); i++)
             chosenStegAlgorithm(fileExtension[i], carrier, output, groups);
-        chosenStegAlgorithm('\0', carrier, output, groups);
     }
+    chosenStegAlgorithm('\0', carrier, output, groups);
 
     if (lsbType == LSBI)
     {
@@ -177,12 +173,13 @@ void embed(const char *bmpPath, const char *filePath, const char *outBmpName, in
         while (fread(&byte, 1, sizeof(byte), fileToEmbed) == 1)
             lsbiInsert(byte, carrier, output, groups);
         // Embed extension
-        if (!hasEncryption)
+        if (hasEncryption == 0)
         {
             for (int i = 0; i < strlen(fileExtension); i++)
                 lsbiInsert(fileExtension[i], carrier, output, groups);
-            lsbiInsert('\0', carrier, output, groups);
         }
+        lsbiInsert('\0', carrier, output, groups);
+
     }
     // Copy the remaining data
     while (fread(&byte, 1, sizeof(byte), carrier))
@@ -190,8 +187,8 @@ void embed(const char *bmpPath, const char *filePath, const char *outBmpName, in
     fclose(fileToEmbed);
     fclose(carrier);
     fclose(output);
-    if (hasEncryption)
-        remove(filePath);
+    // if (hasEncryption)
+    //     remove(filePath);
 }
 
 int handleEmbedding(char * fileToEmbed, char * carrierPath, char * embeddedFileName, int embedMode, int encryptAlgo, int encryptMode, unsigned char * password)
@@ -204,20 +201,26 @@ int handleEmbedding(char * fileToEmbed, char * carrierPath, char * embeddedFileN
     rewind(fp);
     const char * extension = getFileExtension(fileToEmbed);
     printf("ext %s %d\n", extension, strlen(extension));
-    unsigned char data[sz + 4 + strlen(extension)];
+    int dataLen = sz + 4 + strlen(extension) + 1;
+    unsigned char * data = malloc(sizeof(char) * (dataLen));
     sizeTo4ByteArray(sz, data);
-    printf("\n char %d %d %d %d\n", data[0], data[1], data[2], data[3]);
     fread(data + 4, sz, 1, fp);
+    printf("char %d %d %d %d\n", data[0], data[1], data[2], data[3]);
     for(int i = 0 ; i < strlen(extension); i++)
         data[sz + 4 + i] = extension[i];
     char * filePath = fileToEmbed;
     int encrypted = 1;
-    if(encryptMode == 0)encrypted = 0;
-    printf("enc %d\n", encrypted);
+    if(encryptMode == 0) encrypted = 0;
+    printf("\n");
+    for(int i = 4 ; i< sz + 4 + strlen(extension); i++)
+        printf("%c", data[i]);
+    data[sz + 4 + strlen(extension)] = 0;
+    printf("\nenc %d\n", encrypted);
     if(encrypted != 0)
-        filePath = encrypt(password, data, encryptAlgo, encryptMode);
+        filePath = encrypt(password, data, encryptAlgo, encryptMode, dataLen);
     embed(carrierPath, filePath, embeddedFileName, embedMode, encrypted);
     fclose(fp);
+    free(data);
 
     return 0;
 }
