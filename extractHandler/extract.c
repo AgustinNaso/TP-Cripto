@@ -16,11 +16,13 @@ EXTRACT_RET extract(bmpFile *bmp, InputParams inputParams, file *extractedFile)
 
   uint32_t currentEmbeddedSize = 0;
   int groups[GROUPS] = {-1};
+  printf(" param %d", inputParams.stego);
 
   switch (inputParams.stego) 
   {
     case LSB1:
       currentEmbeddedSize = extractSizeFromLSB1(bmp);
+      break;
     case LSB4:
       currentEmbeddedSize = extractSizeFromLSB4(bmp);
       break;
@@ -29,7 +31,7 @@ EXTRACT_RET extract(bmpFile *bmp, InputParams inputParams, file *extractedFile)
       currentEmbeddedSize = extractSizeFromLSBI(bmp, groups);
       break;
   }
-
+  printf("%d %d", currentEmbeddedSize, bmp->imageHeader->imageSize );
   if (currentEmbeddedSize == SIZE_ERROR) 
   {
     printf("Error: unable to extract file with specified steganography algorithm\n");

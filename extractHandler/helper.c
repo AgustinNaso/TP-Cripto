@@ -15,8 +15,10 @@ size_t extractSizeFromLSB1(bmpFile *bmp)
     size |= extractedByte << (8u * (3u - i));
   }
 
-  if (size * 8 > bmp->imageHeader->imageSize) return SIZE_ERROR;
+  printf("\n size lsb1 %d\n", size);
 
+  if (size * 8 > bmp->imageHeader->imageSize) return SIZE_ERROR;
+  printf("\n size lsb1 %d\n", size);
   return size;
 }
 
@@ -44,7 +46,7 @@ size_t extractSizeFromLSBI(bmpFile *bmp, int groups[4])
     uint32_t extractedByte = extractByteFromLSBI(i, bmp->data + GROUPS, groups);
     size |= extractedByte << (8u * (3u - i));
   }
-
+  printf("size: %d", size);
   if (size * 8 > bmp->imageHeader->imageSize) return SIZE_ERROR;
 
   return size;
@@ -121,6 +123,7 @@ void extractFileExtension(file *extractedFile, const uint8_t *data)
 {
   int i = 0;
   while (data[i] != 0) {
-    extractedFile->extension[i] = data[i++];
+    extractedFile->extension[i] = data[i];
+    i++;
   }
 }

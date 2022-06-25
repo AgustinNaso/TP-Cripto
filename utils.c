@@ -31,3 +31,26 @@ void errorHandler(const char *errorMessage) {
     fprintf(stderr, "Failed to %s\n", errorMessage);
     exit(0);
 }
+
+void sizeTo4ByteArray(int sz, unsigned char * size){
+    unsigned char byte;
+    for (int i = 0; i < 4; i++)
+    {
+        byte = (sz >> (8 * (3 - i))) & 0xff;
+        size[i] = byte;
+    }
+}
+
+
+void freeBmpFile(bmpFile * bmp) {
+     free(bmp->header);
+     free(bmp->imageHeader);
+     free(bmp->data);
+     free(bmp);
+}
+
+void freeFile(file * file){
+    free(file->data);
+    free(file->extension);
+    free(file);
+}
