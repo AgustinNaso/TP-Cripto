@@ -8,7 +8,6 @@
 bmpFile *parseBmpFile(char *bmpPath)
 {
     FILE *fd;
-    printf("%s\n", bmpPath);
     if ((fd = fopen(bmpPath, "r")) == NULL)
     {
         fprintf(stderr, "Error: unable to open BMP file \"%s\"\n", bmpPath);
@@ -58,11 +57,8 @@ void writeMessageToOutput(file *extractedFile, const char *outputFileName)
     fullOutputFileName = strcpy(fullOutputFileName, outputFileName);
     fullOutputFileName = strcat(fullOutputFileName, (char *) extractedFile->extension);
 
-    printf("%d\n", extractedFile->extension[0]);
-
     FILE *fd = fopen(fullOutputFileName, "w+"); // reading necessary?
     fwrite(extractedFile->data, extractedFile->size, 1, fd);
-    printf("%zu\n", extractedFile->size);
     fclose(fd);
 
     free(fullOutputFileName);
@@ -112,7 +108,6 @@ void createBmpFile(char *file_name, int height, int width, rgbData *pixels)
     int file_size = HEADER_SIZE + 8 * img_size;
     initFileHeader(&bfh, file_size);
     initImageHeader(&bih, ppm, file_size, width, height);
-    printf("%d\n", bih.headerSize);
 
     FILE *fp = fopen(file_name, "wb");
     fwrite(&bfh, 1, 14, fp);
@@ -121,11 +116,3 @@ void createBmpFile(char *file_name, int height, int width, rgbData *pixels)
 
     return;
 }
-
-
-
-// int main(int argc, char *argv[])
-// {
-//     embed("resources/lado.bmp", "msg.txt", "out.bmp", LSBI);
-//     return 0;
-// }

@@ -14,7 +14,6 @@
 
 int saveEncryptedData(unsigned char *out, int len, char *where)
 {
-    printf("len %d \n", len);
     BIO *b64;
     BIO *bio;
     b64 = BIO_new(BIO_f_base64());
@@ -77,8 +76,6 @@ const EVP_CIPHER *getCipherAndMode(int algorithm, int mode)
         return NULL;
     }
 
-    printf("name %s\n", cipherName);
-
     return EVP_get_cipherbyname(cipherName);
 }
 
@@ -88,8 +85,6 @@ char * encrypt(const unsigned char *password, const unsigned char *toEncrypt, in
     const EVP_CIPHER *selectedEncryptAlgorithm = getCipherAndMode(cipherAlgo, mode);
     int keyLength = EVP_CIPHER_key_length(selectedEncryptAlgorithm);
     int ivLength = EVP_CIPHER_iv_length(selectedEncryptAlgorithm);
-    printf("Clave : %d bytes.\n", keyLength);
-    printf("IV : %d bytes.\n", ivLength);
     unsigned char * key = malloc(sizeof(unsigned char)*keyLength);
     unsigned char * iv = malloc(sizeof(unsigned char)*ivLength);
     EVP_BytesToKey(selectedEncryptAlgorithm, EVP_sha256(), NULL, password, strlen((char *)password), 1, key, iv);
@@ -105,15 +100,11 @@ char * encrypt(const unsigned char *password, const unsigned char *toEncrypt, in
     EVP_CIPHER_CTX_init(ctx);
     // Parametros para contexto de encripcion
     EVP_EncryptInit_ex(ctx, selectedEncryptAlgorithm, NULL, key, iv);
-    printf("\ndataLen %d", dataLen);
     // Encripto
     EVP_EncryptUpdate(ctx, out, &outlen, toEncrypt , dataLen);
-    printf("\nencriptados %d bytes\n", outlen);
 
     EVP_EncryptFinal(ctx, out + outlen, &templ);
-    printf("encriptados ultimos %d bytes\n", templ);
     FILE * fp = fopen(fileName, "wb");
-    printf("\n out len %d\n", outlen + templ);
     fwrite(out, 1, outlen + templ, fp);
     fclose(fp);
     EVP_CIPHER_CTX_cleanup(ctx);
