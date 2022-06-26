@@ -195,6 +195,7 @@ int checkCarrierSize(char * fileToEmbed, char * carrierPath, int stegMode){
     FILE * fp = fopen(fileToEmbed, "r+");
     fseek(fp, 0L, SEEK_END);
     uint32_t fileToEmbedSize = ftell(fp);
+    fileToEmbedSize+= strlen(getFileExtension(fileToEmbed));
     fclose(fp)
     fp = fopen(carrierPath, "r+");
     fseek(fp, 0L, SEEK_END);
@@ -253,7 +254,3 @@ int handleEmbedding(char * fileToEmbed, char * carrierPath, char * embeddedFileN
     free(data);
     return 0;
 }
-
-// int main(){
-//     handleEmbedding("mesaje.txt", "resources/lado.bmp", "embedded.bmp", LSB1, 1, AES_128, CBC, "contrasenia");
-// }
